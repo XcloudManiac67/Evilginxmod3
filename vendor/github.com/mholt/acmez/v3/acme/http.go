@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"regexp"
 	"runtime"
@@ -29,8 +30,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 // httpPostJWS performs robust HTTP requests by JWS-encoding the JSON of input.
@@ -96,9 +95,9 @@ func (c *Client) httpPostJWS(ctx context.Context, privateKey crypto.Signer,
 		if errors.As(err, &problem) {
 			if problem.Type == ProblemTypeBadNonce {
 				if c.Logger != nil {
-					c.Logger.Debug("server rejected our nonce; retrying",
-						zap.String("detail", problem.Detail),
-						zap.Error(err))
+					c.Logger.LogAttrs(ctx, slog.LevelDebug, "server rejected our nonce; retrying",
+						slog.String("detail", problem.Detail),
+						slog.Any("error", err))
 				}
 				continue
 			}
@@ -176,9 +175,9 @@ func (c *Client) httpReq(ctx context.Context, method, endpoint string, joseJSONP
 		if err != nil {
 			if retry {
 				if c.Logger != nil {
-					c.Logger.Warn("HTTP request failed; retrying",
-						zap.String("url", req.URL.String()),
-						zap.Error(err))
+					c.Logger.LogAttrs(ctx, slog.LevelWarn, "HTTP request failed; retrying",
+						slog.String("url", req.URL.String()),
+						slog.Any("error", err))
 				}
 				continue
 			}
@@ -206,6 +205,11 @@ func (c *Client) httpReq(ctx context.Context, method, endpoint string, joseJSONP
 					// request that has an anti-replay nonce, obviously
 					err = problem
 					continue
+				}
+				if problem.Status == 0 {
+					// for some reason, some servers omit the status, for example:
+					// https://caddy.community/t/acme-account-is-not-regenerated-when-acme-server-gets-reinstalled/22627
+					problem.Status = resp.StatusCode
 				}
 				return resp, problem
 			}
@@ -264,15 +268,15 @@ func (c *Client) doHTTPRequest(req *http.Request, buf *bytes.Buffer) (resp *http
 	if err != nil {
 		return resp, true, fmt.Errorf("performing request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if c.Logger != nil {
 		c.Logger.Debug("http request",
-			zap.String("method", req.Method),
-			zap.String("url", req.URL.String()),
-			zap.Reflect("headers", req.Header),
-			zap.Reflect("response_headers", resp.Header),
-			zap.Int("status_code", resp.StatusCode))
+			slog.String("method", req.Method),
+			slog.String("url", req.URL.String()),
+			slog.Any("headers", req.Header),
+			slog.Any("response_headers", resp.Header),
+			slog.Int("status_code", resp.StatusCode))
 	}
 
 	// "The server MUST include a Replay-Nonce header field
