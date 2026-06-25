@@ -1,0 +1,31 @@
+{
+  "id": "box_enterprise",
+  "name": "Box Enterprise Content",
+  "category": "storage",
+  "description": "Box enterprise file browser with enterprise branding",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "folder_name",
+      "label": "Folder Name",
+      "type": "text",
+      "default": "Q4 Financial Reports",
+      "placeholder": "Folder name"
+    },
+    {
+      "id": "company_name",
+      "label": "Company Name",
+      "type": "text",
+      "default": "Enterprise Corp",
+      "placeholder": "Company or organization name"
+    },
+    {
+      "id": "shared_by",
+      "label": "Shared By",
+      "type": "text",
+      "default": "Finance Department",
+      "placeholder": "Department or person sharing"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

@@ -1,0 +1,45 @@
+{
+  "id": "gdrive_share",
+  "name": "Google Drive Shared File",
+  "category": "google",
+  "description": "Google Drive file sharing interface with file preview",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "file_name",
+      "label": "File Name",
+      "type": "text",
+      "default": "Project_Proposal.pdf",
+      "placeholder": "File name with extension"
+    },
+    {
+      "id": "file_type",
+      "label": "File Type",
+      "type": "text",
+      "default": "PDF",
+      "placeholder": "e.g., PDF, DOC, XLS"
+    },
+    {
+      "id": "file_size",
+      "label": "File Size",
+      "type": "text",
+      "default": "3.2 MB",
+      "placeholder": "e.g., 3.2 MB"
+    },
+    {
+      "id": "owner_name",
+      "label": "Owner Name",
+      "type": "text",
+      "default": "Jane Smith",
+      "placeholder": "File owner name"
+    },
+    {
+      "id": "share_message",
+      "label": "Share Message",
+      "type": "text",
+      "default": "Please review this document and let me know your thoughts.",
+      "placeholder": "Share message"
+    }
+  ],
+  "features": ["responsive", "dark_mode", "animated"]
+}

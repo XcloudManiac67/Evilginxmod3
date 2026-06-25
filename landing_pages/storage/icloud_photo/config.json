@@ -1,0 +1,38 @@
+{
+  "id": "icloud_photo",
+  "name": "iCloud Shared Album",
+  "category": "storage",
+  "description": "Apple iCloud photo sharing album with grid layout",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "album_name",
+      "label": "Album Name",
+      "type": "text",
+      "default": "Summer Vacation 2024",
+      "placeholder": "Album name"
+    },
+    {
+      "id": "owner_name",
+      "label": "Owner Name",
+      "type": "text",
+      "default": "Family Album",
+      "placeholder": "Album owner name"
+    },
+    {
+      "id": "photo_count",
+      "label": "Photo Count",
+      "type": "text",
+      "default": "47 photos",
+      "placeholder": "e.g., 47 photos"
+    },
+    {
+      "id": "share_date",
+      "label": "Share Date",
+      "type": "text",
+      "default": "Shared today",
+      "placeholder": "e.g., Shared today"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

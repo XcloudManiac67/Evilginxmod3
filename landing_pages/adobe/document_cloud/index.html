@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{param:folder_name} - Adobe Document Cloud</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="doccloud-container">
+        <header class="doccloud-header">
+            <div class="doccloud-brand">
+                <svg viewBox="0 0 240 234" width="28" height="27">
+                    <path fill="#FF0000" d="M0 0h240v234H0z"/>
+                    <path fill="#fff" d="M74.5 168.5L101 92.5 128 168.5h-53.5zm96-44l-26.5 44H90L139.5 48l30.5 76.5z"/>
+                </svg>
+                <span>Document Cloud</span>
+            </div>
+            <div class="storage-indicator">
+                <div class="storage-bar">
+                    <div class="storage-fill"></div>
+                </div>
+                <span>{param:storage_used}</span>
+            </div>
+        </header>
+
+        <main class="doccloud-main">
+            <div class="folder-header">
+                <div class="folder-icon">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="#FF0000">
+                        <path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/>
+                    </svg>
+                </div>
+                <div class="folder-info">
+                    <h1>{param:folder_name}</h1>
+                    <p>Owned by {param:owner_name} • {param:total_docs}</p>
+                </div>
+            </div>
+
+            <div class="doc-list">
+                <div class="doc-item">
+                    <div class="doc-icon pdf">PDF</div>
+                    <div class="doc-details">
+                        <div class="doc-name">Contract_Agreement.pdf</div>
+                        <div class="doc-meta">2.3 MB • Modified yesterday</div>
+                    </div>
+                    <button class="btn-view" onclick="openDocument()">View</button>
+                </div>
+                <div class="doc-item">
+                    <div class="doc-icon doc">DOC</div>
+                    <div class="doc-details">
+                        <div class="doc-name">Project_Proposal.docx</div>
+                        <div class="doc-meta">1.8 MB • Modified 2 days ago</div>
+                    </div>
+                    <button class="btn-view" onclick="openDocument()">View</button>
+                </div>
+                <div class="doc-item">
+                    <div class="doc-icon xls">XLS</div>
+                    <div class="doc-details">
+                        <div class="doc-name">Budget_Analysis.xlsx</div>
+                        <div class="doc-meta">856 KB • Modified 3 days ago</div>
+                    </div>
+                    <button class="btn-view" onclick="openDocument()">View</button>
+                </div>
+                <div class="doc-item">
+                    <div class="doc-icon ppt">PPT</div>
+                    <div class="doc-details">
+                        <div class="doc-name">Presentation_Slides.pptx</div>
+                        <div class="doc-meta">5.2 MB • Modified last week</div>
+                    </div>
+                    <button class="btn-view" onclick="openDocument()">View</button>
+                </div>
+            </div>
+
+            <div class="folder-actions">
+                <button class="btn-primary" onclick="accessFolder()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    Open Folder
+                </button>
+                <button class="btn-secondary" onclick="downloadFolder()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download All
+                </button>
+            </div>
+        </main>
+
+        <footer class="doccloud-footer">
+            <p>Adobe Document Cloud • Secure document storage and management</p>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+}
+
+.bofa-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+}
+
+.bofa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 32px;
+    background: #fff;
+    border-bottom: 3px solid #E31837;
+}
+
+.bofa-nav {
+    display: flex;
+    gap: 24px;
+}
+
+.bofa-nav a {
+    color: #012169;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.bofa-nav a:hover {
+    color: #E31837;
+}
+
+.alert-main {
+    padding: 40px 32px;
+}
+
+.alert-card {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.alert-header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.alert-icon {
+    margin-bottom: 16px;
+}
+
+.alert-header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #E31837;
+}
+
+.customer-section {
+    margin-bottom: 24px;
+}
+
+.customer-greeting {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.account-ref {
+    font-size: 13px;
+    color: #666;
+}
+
+.alert-message-box {
+    background: #fff8e6;
+    border-left: 4px solid #E31837;
+    padding: 20px;
+    margin-bottom: 24px;
+    border-radius: 4px;
+}
+
+.alert-message-box p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+.alert-meta {
+    display: flex;
+    gap: 24px;
+    font-size: 12px;
+    color: #888;
+}
+
+.security-tips {
+    background: #f5f7fa;
+    padding: 20px;
+    border-radius: 4px;
+    margin-bottom: 32px;
+}
+
+.security-tips h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #012169;
+    margin-bottom: 12px;
+}
+
+.security-tips ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.security-tips li {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.security-tips li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #28a745;
+    font-weight: bold;
+}
+
+.action-area {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.btn-bofa-primary, .btn-bofa-secondary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    flex: 1;
+    justify-content: center;
+}
+
+.btn-bofa-primary {
+    background: #E31837;
+    color: #fff;
+}
+
+.btn-bofa-primary:hover {
+    background: #c11430;
+}
+
+.btn-bofa-secondary {
+    background: #fff;
+    color: #012169;
+    border: 2px solid #012169;
+}
+
+.btn-bofa-secondary:hover {
+    background: #f0f7ff;
+}
+
+.trust-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
+}
+
+.bofa-footer {
+    text-align: center;
+    padding: 32px;
+    background: #f5f5f5;
+    border-top: 1px solid #e0e0e0;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 16px;
+}
+
+.footer-links a {
+    color: #012169;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.footer-links a:hover {
+    color: #E31837;
+}
+
+.bofa-footer p {
+    font-size: 12px;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .bofa-header {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .bofa-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .alert-main {
+        padding: 20px;
+    }
+    
+    .alert-card {
+        padding: 24px;
+    }
+    
+    .action-area {
+        flex-direction: column;
+    }
+    
+    .trust-indicators {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    .footer-links {
+        flex-wrap: wrap;
+    }
+}

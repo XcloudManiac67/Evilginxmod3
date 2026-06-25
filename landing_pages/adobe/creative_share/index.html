@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{param:project_name} - Adobe Creative Cloud</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="creative-container">
+        <header class="creative-header">
+            <div class="creative-logo">
+                <svg viewBox="0 0 240 234" width="32" height="31">
+                    <path fill="#FF0000" d="M0 0h240v234H0z"/>
+                    <path fill="#fff" d="M74.5 168.5L101 92.5 128 168.5h-53.5zm96-44l-26.5 44H90L139.5 48l30.5 76.5z"/>
+                </svg>
+                <span>Creative Cloud</span>
+            </div>
+        </header>
+
+        <main class="share-content">
+            <div class="project-hero">
+                <div class="project-thumbnail">
+                    <svg viewBox="0 0 120 90" width="120" height="90">
+                        <rect fill="#2E001F" width="120" height="90"/>
+                        <circle cx="60" cy="45" r="20" fill="#FF0000" opacity="0.8"/>
+                        <circle cx="45" cy="45" r="20" fill="#3300FF" opacity="0.6"/>
+                    </svg>
+                </div>
+                <h1 class="project-title">{param:project_name}</h1>
+                <p class="project-creator">Shared by {param:creator_name}</p>
+            </div>
+
+            <div class="asset-grid">
+                <div class="asset-item psd">
+                    <div class="asset-icon">Ps</div>
+                    <div class="asset-name">logo_design.psd</div>
+                </div>
+                <div class="asset-item ai">
+                    <div class="asset-icon">Ai</div>
+                    <div class="asset-name">brand_assets.ai</div>
+                </div>
+                <div class="asset-item pdf">
+                    <div class="asset-icon">PDF</div>
+                    <div class="asset-name">style_guide.pdf</div>
+                </div>
+                <div class="asset-item indd">
+                    <div class="asset-icon">Id</div>
+                    <div class="asset-name">brochure.indd</div>
+                </div>
+            </div>
+
+            <div class="project-details">
+                <div class="detail-row">
+                    <span class="detail-label">Files</span>
+                    <span class="detail-value">{param:asset_count}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Formats</span>
+                    <span class="detail-value">{param:file_types}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Size</span>
+                    <span class="detail-value">245 MB</span>
+                </div>
+            </div>
+
+            <div class="action-area">
+                <button class="btn-open-creative" onclick="openInCreative()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Open in Creative Cloud
+                </button>
+                <button class="btn-download" onclick="downloadAssets()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download All
+                </button>
+            </div>
+        </main>
+
+        <footer class="creative-footer">
+            <p>Adobe Creative Cloud • Share your work with the world</p>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

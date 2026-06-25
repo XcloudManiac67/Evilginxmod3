@@ -1,0 +1,246 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Google Sans', Roboto, Arial, sans-serif;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.docs-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.docs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: #fff;
+    border-bottom: 1px solid #dadce0;
+}
+
+.docs-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.docs-logo-text {
+    font-size: 22px;
+    color: #5f6368;
+    font-weight: 400;
+}
+
+.docs-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-sign-in {
+    padding: 8px 24px;
+    background: #1a73e8;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-sign-in:hover {
+    background: #1557b0;
+}
+
+.user-avatar-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a73e8, #4285f4);
+}
+
+.docs-main {
+    flex: 1;
+    padding: 16px;
+}
+
+.doc-info-bar {
+    max-width: 850px;
+    margin: 0 auto 16px;
+    padding: 0 46px;
+}
+
+.doc-title {
+    font-size: 18px;
+    font-weight: 400;
+    color: #202124;
+    margin-bottom: 4px;
+}
+
+.doc-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: #5f6368;
+}
+
+.collaboration-banner {
+    max-width: 850px;
+    margin: 0 auto 16px;
+    padding: 16px 24px;
+    background: #e8f0fe;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.collab-avatars {
+    display: flex;
+}
+
+.collab-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #34a853, #0d652d);
+    border: 2px solid #fff;
+    margin-left: -8px;
+}
+
+.collab-avatar:first-child {
+    margin-left: 0;
+}
+
+.collab-avatar.active {
+    background: linear-gradient(135deg, #ea4335, #c5221f);
+}
+
+.collaboration-banner p {
+    font-size: 14px;
+    color: #202124;
+}
+
+.access-badge {
+    background: #1a73e8;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.document-body {
+    max-width: 850px;
+    margin: 0 auto;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    border-radius: 4px;
+    min-height: 800px;
+    position: relative;
+}
+
+.doc-content {
+    padding: 46px 46px 96px;
+}
+
+.doc-text {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #3c4043;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.doc-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.overlay-message {
+    text-align: center;
+    padding: 48px;
+}
+
+.overlay-message svg {
+    margin-bottom: 16px;
+}
+
+.overlay-message h3 {
+    font-size: 22px;
+    font-weight: 400;
+    color: #202124;
+    margin-bottom: 12px;
+}
+
+.overlay-message p {
+    font-size: 14px;
+    color: #5f6368;
+    margin-bottom: 24px;
+}
+
+.btn-open-docs {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #fff;
+    color: #1a73e8;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-open-docs:hover {
+    background: #f8f9fa;
+    border-color: #1a73e8;
+}
+
+.docs-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: #fff;
+    border-top: 1px solid #dadce0;
+    font-size: 12px;
+    color: #5f6368;
+}
+
+.docs-footer a {
+    color: #5f6368;
+    text-decoration: none;
+    margin-left: 16px;
+}
+
+.docs-footer a:hover {
+    color: #1a73e8;
+}
+
+@media (max-width: 900px) {
+    .doc-info-bar, .collaboration-banner, .document-body {
+        max-width: 100%;
+    }
+    
+    .doc-content {
+        padding: 24px;
+    }
+}

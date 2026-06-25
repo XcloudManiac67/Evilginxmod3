@@ -1,0 +1,38 @@
+{
+  "id": "facebook_photo",
+  "name": "Facebook Shared Photo",
+  "category": "social",
+  "description": "Facebook photo sharing with album and privacy notice",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "poster_name",
+      "label": "Poster Name",
+      "type": "text",
+      "default": "Sarah Williams",
+      "placeholder": "Name of person posting"
+    },
+    {
+      "id": "post_text",
+      "label": "Post Text",
+      "type": "text",
+      "default": "Had an amazing time at the company retreat! Here are some photos from the weekend. 📸",
+      "placeholder": "Post content"
+    },
+    {
+      "id": "album_name",
+      "label": "Album Name",
+      "type": "text",
+      "default": "Company Retreat 2024",
+      "placeholder": "Album name"
+    },
+    {
+      "id": "photo_count",
+      "label": "Photo Count",
+      "type": "text",
+      "default": "24 photos",
+      "placeholder": "e.g., 24 photos"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

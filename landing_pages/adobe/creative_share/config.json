@@ -1,0 +1,38 @@
+{
+  "id": "creative_share",
+  "name": "Adobe Creative Cloud Share",
+  "category": "adobe",
+  "description": "Adobe Creative Cloud portfolio and asset sharing",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "project_name",
+      "label": "Project Name",
+      "type": "text",
+      "default": "Brand Identity Package",
+      "placeholder": "Project or portfolio name"
+    },
+    {
+      "id": "creator_name",
+      "label": "Creator Name",
+      "type": "text",
+      "default": "Sarah Chen",
+      "placeholder": "Creator or designer name"
+    },
+    {
+      "id": "asset_count",
+      "label": "Asset Count",
+      "type": "text",
+      "default": "12 files",
+      "placeholder": "e.g., 12 files, 5 items"
+    },
+    {
+      "id": "file_types",
+      "label": "File Types",
+      "type": "text",
+      "default": "PSD, AI, PDF",
+      "placeholder": "e.g., PSD, AI, PDF"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

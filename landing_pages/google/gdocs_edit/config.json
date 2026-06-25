@@ -1,0 +1,38 @@
+{
+  "id": "gdocs_edit",
+  "name": "Google Docs Collaboration",
+  "category": "google",
+  "description": "Google Docs document editor with collaboration invite",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "doc_title",
+      "label": "Document Title",
+      "type": "text",
+      "default": "Team Notes - Q4 Planning",
+      "placeholder": "Document title"
+    },
+    {
+      "id": "doc_preview",
+      "label": "Document Preview Text",
+      "type": "text",
+      "default": "Q4 Planning Meeting Notes\n\nAgenda:\n1. Review Q3 results\n2. Discuss Q4 goals\n3. Resource allocation\n4. Timeline discussion",
+      "placeholder": "Preview text shown in document"
+    },
+    {
+      "id": "collaborator_name",
+      "label": "Collaborator Name",
+      "type": "text",
+      "default": "David Miller",
+      "placeholder": "Name inviting to collaborate"
+    },
+    {
+      "id": "access_level",
+      "label": "Access Level",
+      "type": "text",
+      "default": "Can edit",
+      "placeholder": "e.g., Can edit, Can comment, Can view"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

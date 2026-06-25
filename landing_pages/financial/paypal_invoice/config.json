@@ -1,0 +1,45 @@
+{
+  "id": "paypal_invoice",
+  "name": "PayPal Invoice Request",
+  "category": "financial",
+  "description": "PayPal invoice and payment request interface",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "merchant_name",
+      "label": "Merchant Name",
+      "type": "text",
+      "default": "Professional Services Inc.",
+      "placeholder": "Merchant or sender name"
+    },
+    {
+      "id": "merchant_email",
+      "label": "Merchant Email",
+      "type": "email",
+      "default": "billing@professional-services.com",
+      "placeholder": "Merchant email"
+    },
+    {
+      "id": "invoice_amount",
+      "label": "Invoice Amount",
+      "type": "text",
+      "default": "$450.00",
+      "placeholder": "e.g., $450.00"
+    },
+    {
+      "id": "invoice_description",
+      "label": "Invoice Description",
+      "type": "text",
+      "default": "Consulting Services - January 2024",
+      "placeholder": "Description of goods/services"
+    },
+    {
+      "id": "invoice_number",
+      "label": "Invoice Number",
+      "type": "text",
+      "default": "INV-2024-00123",
+      "placeholder": "Invoice reference number"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

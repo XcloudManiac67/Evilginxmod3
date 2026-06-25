@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{param:doc_title} - Google Docs</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="docs-container">
+        <header class="docs-header">
+            <div class="docs-brand">
+                <svg viewBox="0 0 64 88" width="28" height="38">
+                    <path fill="#4285F4" d="M58 88H6c-3.3 0-6-2.7-6-6V6c0-3.3 2.7-6 6-6h36l22 22v66c0 3.3-2.7 6-6 6z"/>
+                    <path fill="#fff" d="M42 0v22h22L42 0z" opacity="0.3"/>
+                    <text x="32" y="60" font-size="16" fill="#fff" text-anchor="middle">DOC</text>
+                </svg>
+                <span class="docs-logo-text">Docs</span>
+            </div>
+            <div class="docs-actions">
+                <button class="btn-sign-in" onclick="signInToEdit()">Sign in to edit</button>
+                <div class="user-avatar-small"></div>
+            </div>
+        </header>
+
+        <main class="docs-main">
+            <div class="doc-info-bar">
+                <h1 class="doc-title">{param:doc_title}</h1>
+                <div class="doc-meta">
+                    <span class="last-edit">Last edit was seconds ago</span>
+                    <span class="autosave">All changes saved in Drive</span>
+                </div>
+            </div>
+
+            <div class="collaboration-banner">
+                <div class="collab-avatars">
+                    <div class="collab-avatar active"></div>
+                    <div class="collab-avatar"></div>
+                </div>
+                <p><strong>{param:collaborator_name}</strong> shared this document with you • <span class="access-badge">{param:access_level}</span></p>
+            </div>
+
+            <div class="document-body">
+                <div class="doc-content">
+                    <pre class="doc-text">{param:doc_preview}</pre>
+                </div>
+                <div class="doc-overlay">
+                    <div class="overlay-message">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="#5f6368">
+                            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                        </svg>
+                        <h3>Sign in to view this document</h3>
+                        <p>{param:collaborator_name} has invited you to collaborate on this document.</p>
+                        <button class="btn-open-docs" onclick="signInToEdit()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3 5v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.11 0-2 .9-2 2zm12 4c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3zm-9 8c0-2 4-3.1 6-3.1s6 1.1 6 3.1v1H6v-1z"/>
+                            </svg>
+                            Open in Google Docs
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="docs-footer">
+            <div class="footer-left">
+                <span>English (United States)</span>
+            </div>
+            <div class="footer-right">
+                <a href="#">Help</a>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

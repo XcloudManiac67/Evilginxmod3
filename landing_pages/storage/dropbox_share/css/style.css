@@ -1,0 +1,156 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: #f6f9fc;
+    min-height: 100vh;
+}
+
+.dropbox-container {
+    max-width: 560px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: #fff;
+}
+
+.dropbox-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e3e3e3;
+}
+
+.dropbox-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 20px;
+    color: #1e1919;
+}
+
+.share-main {
+    padding: 48px 40px;
+    text-align: center;
+}
+
+.file-preview-card {
+    margin-bottom: 32px;
+}
+
+.file-icon-large {
+    margin-bottom: 24px;
+}
+
+.file-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1e1919;
+    margin-bottom: 8px;
+    word-break: break-word;
+}
+
+.file-subtitle {
+    font-size: 14px;
+    color: #637381;
+    margin-bottom: 12px;
+}
+
+.share-info {
+    font-size: 13px;
+    color: #637381;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+
+.btn-download-primary, .btn-preview {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-download-primary {
+    background: #0061FF;
+    color: #fff;
+}
+
+.btn-download-primary:hover {
+    background: #0052d4;
+}
+
+.btn-preview {
+    background: #fff;
+    color: #1e1919;
+    border: 1px solid #d0d0d0;
+}
+
+.btn-preview:hover {
+    background: #f6f9fc;
+}
+
+.signin-prompt {
+    padding-top: 32px;
+    border-top: 1px solid #e3e3e3;
+}
+
+.signin-prompt p {
+    font-size: 14px;
+    color: #637381;
+    margin-bottom: 16px;
+}
+
+.btn-signin {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e1919;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-signin:hover {
+    border-color: #0061FF;
+    color: #0061FF;
+}
+
+.dropbox-footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: #637381;
+}
+
+.dropbox-footer a {
+    color: #0061FF;
+    text-decoration: none;
+}
+
+@media (max-width: 600px) {
+    .share-main {
+        padding: 32px 24px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+}

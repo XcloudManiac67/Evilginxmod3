@@ -1,0 +1,38 @@
+{
+  "id": "chase_document",
+  "name": "Chase Secure Document",
+  "category": "financial",
+  "description": "Chase bank secure message center and document vault",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "customer_name",
+      "label": "Customer Name",
+      "type": "text",
+      "default": "Valued Customer",
+      "placeholder": "Customer name"
+    },
+    {
+      "id": "account_type",
+      "label": "Account Type",
+      "type": "text",
+      "default": "Chase Checking",
+      "placeholder": "e.g., Chase Checking"
+    },
+    {
+      "id": "document_type",
+      "label": "Document Type",
+      "type": "text",
+      "default": "Statement Available",
+      "placeholder": "Type of document/alert"
+    },
+    {
+      "id": "alert_message",
+      "label": "Alert Message",
+      "type": "text",
+      "default": "Your monthly statement is now available for review. Please sign in to access your documents.",
+      "placeholder": "Alert or message content"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

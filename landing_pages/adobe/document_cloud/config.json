@@ -1,0 +1,38 @@
+{
+  "id": "document_cloud",
+  "name": "Adobe Document Cloud",
+  "category": "adobe",
+  "description": "Adobe Document Cloud storage and document management",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "folder_name",
+      "label": "Folder Name",
+      "type": "text",
+      "default": "Business Documents",
+      "placeholder": "Folder name"
+    },
+    {
+      "id": "owner_name",
+      "label": "Owner Name",
+      "type": "text",
+      "default": "Document Cloud User",
+      "placeholder": "Owner name"
+    },
+    {
+      "id": "total_docs",
+      "label": "Total Documents",
+      "type": "text",
+      "default": "47 documents",
+      "placeholder": "e.g., 47 documents"
+    },
+    {
+      "id": "storage_used",
+      "label": "Storage Used",
+      "type": "text",
+      "default": "1.2 GB of 20 GB used",
+      "placeholder": "e.g., 1.2 GB of 20 GB used"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "gmail_secure",
+  "name": "Gmail Confidential Mode",
+  "category": "google",
+  "description": "Gmail confidential mode message with secure unlock",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "sender_name",
+      "label": "Sender Name",
+      "type": "text",
+      "default": "Alex Thompson",
+      "placeholder": "Email sender name"
+    },
+    {
+      "id": "sender_email",
+      "label": "Sender Email",
+      "type": "email",
+      "default": "alex.thompson@company.com",
+      "placeholder": "sender@company.com"
+    },
+    {
+      "id": "subject",
+      "label": "Email Subject",
+      "type": "text",
+      "default": "Confidential: Q4 Financial Review",
+      "placeholder": "Email subject line"
+    },
+    {
+      "id": "expiration",
+      "label": "Expiration Text",
+      "type": "text",
+      "default": "Expires in 7 days",
+      "placeholder": "e.g., Expires in 7 days"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

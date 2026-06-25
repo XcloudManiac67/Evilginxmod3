@@ -1,0 +1,253 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+}
+
+.chase-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+.chase-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.chase-nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.chase-nav a {
+    color: #0b4f8c;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.chase-nav a:hover {
+    color: #0a3d6e;
+}
+
+.btn-signin-nav {
+    padding: 8px 20px;
+    background: #0b4f8c;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-signin-nav:hover {
+    background: #0a3d6e;
+}
+
+.secure-message {
+    padding: 32px 40px;
+}
+
+.security-banner {
+    text-align: center;
+    margin-bottom: 32px;
+    padding: 32px;
+    background: linear-gradient(135deg, #f0f7ff 0%, #fff 100%);
+    border-radius: 8px;
+}
+
+.security-banner h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #0b4f8c;
+    margin-top: 16px;
+}
+
+.message-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 32px;
+    margin-bottom: 32px;
+}
+
+.customer-greeting {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.customer-greeting h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.customer-greeting p {
+    font-size: 14px;
+    color: #666;
+}
+
+.alert-box {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background: #fff8e6;
+    border-left: 4px solid #f5a623;
+    border-radius: 4px;
+    margin-bottom: 24px;
+}
+
+.alert-icon {
+    flex-shrink: 0;
+}
+
+.alert-content h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.alert-content p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.alert-meta {
+    display: flex;
+    gap: 24px;
+    font-size: 12px;
+    color: #888;
+}
+
+.document-preview {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    margin-bottom: 24px;
+}
+
+.doc-info .doc-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.doc-info .doc-size {
+    font-size: 12px;
+    color: #888;
+}
+
+.action-area {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.btn-chase-primary, .btn-chase-secondary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-chase-primary {
+    background: #0b4f8c;
+    color: #fff;
+}
+
+.btn-chase-primary:hover {
+    background: #0a3d6e;
+}
+
+.btn-chase-secondary {
+    background: #fff;
+    color: #0b4f8c;
+    border: 2px solid #0b4f8c;
+}
+
+.btn-chase-secondary:hover {
+    background: #f0f7ff;
+}
+
+.security-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.message-footer {
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+}
+
+.message-footer p {
+    margin-bottom: 8px;
+}
+
+.chase-footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: #666;
+    background: #f5f5f5;
+}
+
+.chase-footer a {
+    color: #0b4f8c;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .secure-message {
+        padding: 20px;
+    }
+    
+    .chase-nav a {
+        display: none;
+    }
+    
+    .alert-box {
+        flex-direction: column;
+    }
+    
+    .action-area {
+        flex-direction: column;
+    }
+}

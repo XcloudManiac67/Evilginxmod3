@@ -1,0 +1,38 @@
+{
+  "id": "twitter_exclusive",
+  "name": "Twitter/X Exclusive Content",
+  "category": "social",
+  "description": "Twitter/X restricted content notice with sign-in requirement",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "account_name",
+      "label": "Account Name",
+      "type": "text",
+      "default": "Tech Insider Pro",
+      "placeholder": "Account handle or name"
+    },
+      {
+      "id": "account_handle",
+      "label": "Account Handle",
+      "type": "text",
+      "default": "@TechInsiderPro",
+      "placeholder": "e.g., @username"
+    },
+    {
+      "id": "content_type",
+      "label": "Content Type",
+      "type": "text",
+      "default": "Exclusive Analysis",
+      "placeholder": "Type of content"
+    },
+    {
+      "id": "preview_text",
+      "label": "Preview Text",
+      "type": "text",
+      "default": "🧵 THREAD: The inside story of what really happened at yesterday's closed-door meeting. This is what they don't want you to know...",
+      "placeholder": "Preview text for the tweet"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

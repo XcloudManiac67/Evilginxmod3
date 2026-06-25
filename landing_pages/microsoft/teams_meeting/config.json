@@ -1,0 +1,45 @@
+{
+  "id": "teams_meeting",
+  "name": "Microsoft Teams Meeting",
+  "category": "microsoft",
+  "description": "Microsoft Teams meeting invite with join button and calendar integration",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "meeting_title",
+      "label": "Meeting Title",
+      "type": "text",
+      "default": "Weekly Team Sync",
+      "placeholder": "Meeting subject"
+    },
+    {
+      "id": "organizer_name",
+      "label": "Organizer Name",
+      "type": "text",
+      "default": "Michael Chen",
+      "placeholder": "Meeting organizer"
+    },
+    {
+      "id": "organizer_email",
+      "label": "Organizer Email",
+      "type": "email",
+      "default": "michael.chen@company.com",
+      "placeholder": "organizer@company.com"
+    },
+    {
+      "id": "meeting_date",
+      "label": "Meeting Date",
+      "type": "text",
+      "default": "Today",
+      "placeholder": "e.g., Today, Tomorrow, Jan 15"
+    },
+    {
+      "id": "meeting_time",
+      "label": "Meeting Time",
+      "type": "text",
+      "default": "2:00 PM - 3:00 PM",
+      "placeholder": "e.g., 2:00 PM - 3:00 PM"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

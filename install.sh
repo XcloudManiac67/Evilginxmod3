@@ -41,6 +41,7 @@
 #   - Installs phishlets    → /opt/evilginx/phishlets/
 #   - Installs redirectors  → /opt/evilginx/redirectors/
 #   - Installs post-redirectors → /opt/evilginx/post_redirectors/
+#   - Installs landing pages   → /opt/evilginx/landing_pages/
 #   - Installs web UI       → /opt/evilginx/web/
 #   - Installs GoPhish static files + GeoIP DB → /opt/evilginx/static/
 #   - Creates system-wide wrapper at /usr/local/bin/evilginx (auto-loads paths)
@@ -1188,14 +1189,17 @@ RESOLVEOF
 # Called by both build_evilginx() and download_evilginx() to avoid duplication.
 _install_data_files() {
     local BUILD_DIR="$1"
-    log_info "Installing phishlets, redirectors, post_redirectors, and web UI..."
+    log_info "Installing phishlets, redirectors, post_redirectors, landing_pages, and web UI..."
     log_info "Refreshing bundled phishlets directory..."
     rm -rf "$INSTALL_BASE/phishlets"
-    mkdir -p "$INSTALL_BASE/phishlets" "$INSTALL_BASE/redirectors" "$INSTALL_BASE/post_redirectors" "$INSTALL_BASE/web"
+    mkdir -p "$INSTALL_BASE/phishlets" "$INSTALL_BASE/redirectors" "$INSTALL_BASE/post_redirectors" "$INSTALL_BASE/landing_pages" "$INSTALL_BASE/web"
     cp -r "$BUILD_DIR/phishlets/." "$INSTALL_BASE/phishlets/"
     cp -ru "$BUILD_DIR/redirectors/." "$INSTALL_BASE/redirectors/"
     if [ -d "$BUILD_DIR/post_redirectors" ]; then
         cp -ru "$BUILD_DIR/post_redirectors/." "$INSTALL_BASE/post_redirectors/"
+    fi
+    if [ -d "$BUILD_DIR/landing_pages" ]; then
+        cp -ru "$BUILD_DIR/landing_pages/." "$INSTALL_BASE/landing_pages/"
     fi
     if [ -d "$BUILD_DIR/web" ]; then
         cp -ru "$BUILD_DIR/web/." "$INSTALL_BASE/web/"
@@ -1211,7 +1215,7 @@ _install_data_files() {
     log_info "Creating system-wide wrapper script..."
     cat > /usr/local/bin/evilginx << WRAPEOF
 #!/bin/bash
-exec $INSTALL_BASE/evilginx.bin -p $INSTALL_BASE/phishlets -t $INSTALL_BASE/redirectors "\$@"
+exec $INSTALL_BASE/evilginx.bin -p $INSTALL_BASE/phishlets -t $INSTALL_BASE/redirectors -u $INSTALL_BASE/post_redirectors -l $INSTALL_BASE/landing_pages "\$@"
 WRAPEOF
     chmod +x /usr/local/bin/evilginx
 

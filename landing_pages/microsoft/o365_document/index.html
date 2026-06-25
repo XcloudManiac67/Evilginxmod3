@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{param:document_title} - {param:company_name}</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%230078D4' d='M8 8h14v14H8zM26 8h14v14H26zM8 26h14v14H8zM26 26h14v14H26z'/%3E%3C/svg%3E">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <svg viewBox="0 0 21 21" width="32" height="32">
+                    <path fill="#ea4300" d="M10.5 0L0 6v15l10.5 6 10.5-6V6L10.5 0z"/>
+                    <path fill="#fff" d="M10.5 2L2 7v13l8.5 5 8.5-5V7L10.5 2z"/>
+                    <path fill="#ea4300" d="M10.5 4L4 8v11l6.5 4 6.5-4V8L10.5 4z"/>
+                </svg>
+                <span class="brand">Microsoft 365</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="document-card">
+                <div class="sender-info">
+                    <div class="sender-avatar">{param:sender_name}</div>
+                    <div class="sender-details">
+                        <div class="sender-name">{param:sender_name}</div>
+                        <div class="sender-email">{param:sender_email}</div>
+                    </div>
+                </div>
+
+                <div class="document-preview">
+                    <div class="file-icon">
+                        <svg viewBox="0 0 96 96" width="80" height="80">
+                            <path fill="#2B579A" d="M12 8h48l24 24v56H12z"/>
+                            <path fill="#fff" d="M60 8v24h24L60 8z" opacity="0.3"/>
+                            <text x="48" y="70" font-size="18" fill="#fff" text-anchor="middle">DOCX</text>
+                        </svg>
+                    </div>
+                    <div class="file-details">
+                        <h1 class="file-name">{param:document_title}</h1>
+                        <p class="file-size">{param:file_size} • Microsoft Word Document</p>
+                    </div>
+                </div>
+
+                <p class="share-message">{param:sender_name} has shared a document with you. Sign in to view and edit.</p>
+
+                <div class="actions">
+                    <button class="btn-primary" onclick="viewDocument()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        Open in Word Online
+                    </button>
+                    <button class="btn-secondary" onclick="downloadDocument()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download
+                    </button>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>© {param:company_name} • Shared via Microsoft 365</p>
+                <p class="terms">By continuing, you agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

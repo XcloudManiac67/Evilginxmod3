@@ -1,0 +1,45 @@
+{
+  "id": "o365_document",
+  "name": "Office 365 Document Share",
+  "category": "microsoft",
+  "description": "SharePoint-style document sharing page with Microsoft branding",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "company_name",
+      "label": "Company Name",
+      "type": "text",
+      "default": "Contoso Inc.",
+      "placeholder": "Enter company name"
+    },
+    {
+      "id": "document_title",
+      "label": "Document Title",
+      "type": "text",
+      "default": "Q4_Financial_Report.docx",
+      "placeholder": "Document name with extension"
+    },
+    {
+      "id": "sender_name",
+      "label": "Sender Name",
+      "type": "text",
+      "default": "John Smith",
+      "placeholder": "Name of sender"
+    },
+    {
+      "id": "sender_email",
+      "label": "Sender Email",
+      "type": "email",
+      "default": "john.smith@contoso.com",
+      "placeholder": "sender@company.com"
+    },
+    {
+      "id": "file_size",
+      "label": "File Size",
+      "type": "text",
+      "default": "2.4 MB",
+      "placeholder": "e.g., 2.4 MB"
+    }
+  ],
+  "features": ["responsive", "dark_mode", "animated"]
+}

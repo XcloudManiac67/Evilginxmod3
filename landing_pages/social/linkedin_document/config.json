@@ -1,0 +1,45 @@
+{
+  "id": "linkedin_document",
+  "name": "LinkedIn Document Post",
+  "category": "social",
+  "description": "LinkedIn professional document post with view button",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "post_author",
+      "label": "Post Author",
+      "type": "text",
+      "default": "Michael Chen",
+      "placeholder": "Name of person posting"
+    },
+    {
+      "id": "author_title",
+      "label": "Author Title",
+      "type": "text",
+      "default": "VP of Marketing at TechCorp",
+      "placeholder": "Professional title"
+    },
+    {
+      "id": "post_text",
+      "label": "Post Text",
+      "type": "text",
+      "default": "Excited to share our Q4 market analysis report. This comprehensive document covers industry trends, competitive landscape, and strategic recommendations.",
+      "placeholder": "Post content text"
+    },
+    {
+      "id": "doc_title",
+      "label": "Document Title",
+      "type": "text",
+      "default": "Q4 Market Analysis Report 2024",
+      "placeholder": "Document title"
+    },
+    {
+      "id": "doc_pages",
+      "label": "Document Pages",
+      "type": "text",
+      "default": "32 pages",
+      "placeholder": "e.g., 32 pages"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

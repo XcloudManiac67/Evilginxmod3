@@ -1,0 +1,38 @@
+{
+  "id": "dropbox_share",
+  "name": "Dropbox Shared Link",
+  "category": "storage",
+  "description": "Dropbox file sharing with preview and download options",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "file_name",
+      "label": "File Name",
+      "type": "text",
+      "default": "Project_Files.zip",
+      "placeholder": "File name"
+    },
+    {
+      "id": "file_size",
+      "label": "File Size",
+      "type": "text",
+      "default": "45.2 MB",
+      "placeholder": "e.g., 45.2 MB"
+    },
+    {
+      "id": "shared_by",
+      "label": "Shared By",
+      "type": "text",
+      "default": "Alex Martinez",
+      "placeholder": "Name of sharer"
+    },
+    {
+      "id": "share_date",
+      "label": "Share Date",
+      "type": "text",
+      "default": "Today at 11:30 AM",
+      "placeholder": "e.g., Today at 11:30 AM"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

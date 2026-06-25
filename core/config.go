@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
@@ -31,7 +32,30 @@ type Lure struct {
 	OgDescription   string `mapstructure:"og_desc" json:"og_desc" yaml:"og_desc"`
 	OgImageUrl      string `mapstructure:"og_image" json:"og_image" yaml:"og_image"`
 	OgUrl           string `mapstructure:"og_url" json:"og_url" yaml:"og_url"`
-	PausedUntil     int64  `mapstructure:"paused" json:"paused" yaml:"paused"`
+	PausedUntil          int64  `mapstructure:"paused" json:"paused" yaml:"paused"`
+	LandingPage          string `mapstructure:"landing_page" json:"landing_page" yaml:"landing_page"`
+	LandingConfig        map[string]string `mapstructure:"landing_config" json:"landing_config" yaml:"landing_config"`
+	UseExternalRedirect  bool   `mapstructure:"use_external_redirect" json:"use_external_redirect" yaml:"use_external_redirect"`
+	ExternalRedirectUrl  string `mapstructure:"external_redirect_url" json:"external_redirect_url" yaml:"external_redirect_url"`
+}
+
+type LandingPageTemplate struct {
+	ID          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Category    string                 `json:"category"`
+	Description string                 `json:"description"`
+	Preview     string                 `json:"preview"`
+	Version     string                 `json:"version"`
+	Params      []LandingPageParam     `json:"params"`
+	Features    []string               `json:"features"`
+}
+
+type LandingPageParam struct {
+	ID          string `json:"id"`
+	Label       string `json:"label"`
+	Type        string `json:"type"`
+	Default     string `json:"default"`
+	Placeholder string `json:"placeholder"`
 }
 
 type SubPhishlet struct {
@@ -160,6 +184,7 @@ type Config struct {
 	activeHostnames        []string
 	redirectorsDir         string
 	postRedirectorsDir     string
+	landingPagesDir        string
 	lures                  []*Lure
 	lureIds                []string
 	subphishlets           []*SubPhishlet
@@ -1065,6 +1090,97 @@ func (c *Config) GetRedirectorsDir() string {
 
 func (c *Config) GetPostRedirectorsDir() string {
 	return c.postRedirectorsDir
+}
+
+func (c *Config) SetLandingPagesDir(path string) {
+	c.landingPagesDir = path
+}
+
+func (c *Config) GetLandingPagesDir() string {
+	return c.landingPagesDir
+}
+
+// ListLandingPageTemplates returns all available landing page templates
+func (c *Config) ListLandingPageTemplates() ([]*LandingPageTemplate, error) {
+	templates := []*LandingPageTemplate{}
+	
+	landingPagesDir := c.GetLandingPagesDir()
+	if landingPagesDir == "" {
+		return templates, nil
+	}
+
+	// Read categories (subdirectories)
+	categories, err := os.ReadDir(landingPagesDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return templates, nil
+		}
+		return nil, err
+	}
+
+	for _, category := range categories {
+		if !category.IsDir() {
+			continue
+		}
+		categoryName := category.Name()
+		categoryPath := filepath.Join(landingPagesDir, categoryName)
+
+		// Read templates in this category
+		templateDirs, err := os.ReadDir(categoryPath)
+		if err != nil {
+			continue
+		}
+
+		for _, templateDir := range templateDirs {
+			if !templateDir.IsDir() {
+				continue
+			}
+			templateID := templateDir.Name()
+			templatePath := filepath.Join(categoryPath, templateID)
+
+			// Read config.json if exists
+			configPath := filepath.Join(templatePath, "config.json")
+			template := &LandingPageTemplate{
+				ID:       templateID,
+				Category: categoryName,
+			}
+
+			if configData, err := os.ReadFile(configPath); err == nil {
+				json.Unmarshal(configData, template)
+			}
+
+			// Set defaults if not in config
+			if template.Name == "" {
+				template.Name = templateID
+			}
+			if template.Description == "" {
+				template.Description = fmt.Sprintf("%s/%s landing page", categoryName, templateID)
+			}
+			if template.Preview == "" {
+				template.Preview = fmt.Sprintf("landing_pages/%s/%s/preview.jpg", categoryName, templateID)
+			}
+
+			templates = append(templates, template)
+		}
+	}
+
+	return templates, nil
+}
+
+// GetLandingPageTemplate returns a specific landing page template by ID (format: category/template)
+func (c *Config) GetLandingPageTemplate(templateID string) (*LandingPageTemplate, error) {
+	templates, err := c.ListLandingPageTemplates()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, t := range templates {
+		if fmt.Sprintf("%s/%s", t.Category, t.ID) == templateID {
+			return t, nil
+		}
+	}
+
+	return nil, fmt.Errorf("landing page template '%s' not found", templateID)
 }
 
 func (c *Config) GetWebAdminPort() int {

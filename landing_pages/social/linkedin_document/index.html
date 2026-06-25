@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{param:post_author} on LinkedIn</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="linkedin-container">
+        <header class="linkedin-header">
+            <div class="linkedin-logo">
+                <svg viewBox="0 0 34 34" width="34" height="34">
+                    <path fill="#0a66c2" d="M34,2.5v29A2.5,2.5,0,0,1,31.5,34H2.5A2.5,2.5,0,0,1,0,31.5V2.5A2.5,2.5,0,0,1,2.5,0h29A2.5,2.5,0,0,1,34,2.5ZM10,13H5V29h5Zm.45-6.5a2.88,2.88,0,0,0-2.86-2.9H7.51a2.9,2.9,0,0,0,0,5.8,2.88,2.88,0,0,0,2.94-2.9ZM29,19.57c0-5.16-3.25-7.51-7.65-7.51a6.53,6.53,0,0,0-5.67,3h-.12V13H11V29h5.15V20.65a3.68,3.68,0,0,1,3.49-3.92c2.29,0,2.45,2.2,2.45,3.93V29H27.15s.07-9.87.07-11.06Z"/>
+                </svg>
+            </div>
+        </header>
+
+        <main class="feed-container">
+            <article class="linkedin-post">
+                <div class="post-header">
+                    <div class="author-avatar">{param:post_author}</div>
+                    <div class="author-info">
+                        <h3 class="author-name">{param:post_author}</h3>
+                        <p class="author-title">{param:author_title}</p>
+                        <span class="post-time">2h • <svg class="globe-icon" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M8 1a7 7 0 107 7 7 7 0 00-7-7zM5 8a2.92 2.92 0 00.11.83L3.26 9.5A4.93 4.93 0 013 8a6 6 0 01.37-2.06l2 .65A3 3 0 005 8zm6.34-2.86l-2 .65a3 3 0 00-.11 5l2 .65A4.93 4.93 0 0013 8a6 6 0 00-.37-2.06zM8 11a3 3 0 01-2.88-2.13l-2 .65A5 5 0 008 13a4.93 4.93 0 002.88-1.12l-2-.65A3 3 0 018 11zm0-8a3 3 0 012.88 2.13l2-.65A5 5 0 008 3a4.93 4.93 0 00-2.88 1.12l2 .65A3 3 0 018 3z"/></svg></span>
+                    </div>
+                    <button class="btn-follow">+ Follow</button>
+                </div>
+
+                <div class="post-content">
+                    <p>{param:post_text}</p>
+                </div>
+
+                <div class="document-preview">
+                    <div class="doc-thumbnail">
+                        <div class="doc-icon">
+                            <svg viewBox="0 0 24 24" width="48" height="48" fill="#0a66c2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                                <path fill="#fff" d="M14 3v5h5M16 13H8M16 17H8M10 9H8" stroke="none"/>
+                            </svg>
+                        </div>
+                        <div class="doc-overlay">
+                            <span class="page-count">{param:doc_pages}</span>
+                        </div>
+                    </div>
+                    <div class="doc-info">
+                        <h4 class="doc-title">{param:doc_title}</h4>
+                        <p class="doc-meta">PDF • {param:doc_pages}</p>
+                    </div>
+                    <button class="btn-view-doc" onclick="viewDocument()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        View
+                    </button>
+                </div>
+
+                <div class="post-stats">
+                    <span class="reactions">
+                        <span class="reaction-icon like">👍</span>
+                        <span class="reaction-icon love">❤️</span>
+                        <span class="reaction-count">247 reactions</span>
+                    </span>
+                    <span class="comments">18 comments • 56 reposts</span>
+                </div>
+
+                <div class="post-actions">
+                    <button class="action-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                        </svg>
+                        Like
+                    </button>
+                    <button class="action-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                        </svg>
+                        Comment
+                    </button>
+                    <button class="action-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 2.5l4 4.5-4 4.5M3 7h18M3 17h14l-4-4.5 4-4.5"></path>
+                        </svg>
+                        Repost
+                    </button>
+                    <button class="action-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                        Send
+                    </button>
+                </div>
+            </article>
+        </main>
+
+        <footer class="linkedin-footer">
+            <p>LinkedIn Corporation © 2024</p>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

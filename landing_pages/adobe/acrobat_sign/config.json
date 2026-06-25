@@ -1,0 +1,38 @@
+{
+  "id": "acrobat_sign",
+  "name": "Adobe Acrobat Sign Document",
+  "category": "adobe",
+  "description": "Adobe Acrobat Sign document for e-signatures",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "document_name",
+      "label": "Document Name",
+      "type": "text",
+      "default": "Employment Agreement.pdf",
+      "placeholder": "Document name"
+    },
+    {
+      "id": "sender_name",
+      "label": "Sender Name",
+      "type": "text",
+      "default": "HR Department",
+      "placeholder": "Sender or company name"
+    },
+    {
+      "id": "sender_org",
+      "label": "Organization",
+      "type": "text",
+      "default": "Acme Corporation",
+      "placeholder": "Organization name"
+    },
+    {
+      "id": "message",
+      "label": "Message",
+      "type": "text",
+      "default": "Please review and sign the attached document.",
+      "placeholder": "Message to recipient"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

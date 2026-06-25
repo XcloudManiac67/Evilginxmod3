@@ -28,6 +28,7 @@ import (
 var phishlets_dir = flag.String("p", "", "Phishlets directory path")
 var redirectors_dir = flag.String("t", "", "HTML redirector pages directory path")
 var post_redirectors_dir = flag.String("u", "", "HTML post-redirector pages directory path")
+var landing_pages_dir = flag.String("l", "", "HTML landing pages directory path")
 var debug_log = flag.Bool("debug", false, "Enable debug output")
 var log_file = flag.String("log", "", "Tee all log output to this file (useful for grepping debug tags like [kasada-dbg], [gdlogin], [fedleak])")
 var developer_mode = flag.Bool("developer", false, "Enable developer mode (generates self-signed certificates for all hostnames)")
@@ -128,6 +129,23 @@ func main() {
 		}
 		*post_redirectors_dir = filepath.Clean(*post_redirectors_dir)
 	}
+	if *landing_pages_dir == "" {
+		// Try 1: Relative to executable
+		*landing_pages_dir = joinPath(exe_dir, "landing_pages")
+		if _, err := os.Stat(*landing_pages_dir); os.IsNotExist(err) {
+			// Try 2: Parent directory
+			*landing_pages_dir = joinPath(exe_dir, "../landing_pages")
+			if _, err := os.Stat(*landing_pages_dir); os.IsNotExist(err) {
+				// Try 3: System installation path
+				*landing_pages_dir = "/usr/share/evilginx/landing_pages/"
+				if _, err := os.Stat(*landing_pages_dir); os.IsNotExist(err) {
+					// Default to creating in exe_dir
+					*landing_pages_dir = joinPath(exe_dir, "landing_pages")
+				}
+			}
+		}
+		*landing_pages_dir = filepath.Clean(*landing_pages_dir)
+	}
 	if _, err := os.Stat(*phishlets_dir); os.IsNotExist(err) {
 		log.Fatal("provided phishlets directory path does not exist: %s", *phishlets_dir)
 		return
@@ -137,6 +155,9 @@ func main() {
 	}
 	if _, err := os.Stat(*post_redirectors_dir); os.IsNotExist(err) {
 		os.MkdirAll(*post_redirectors_dir, os.FileMode(0700))
+	}
+	if _, err := os.Stat(*landing_pages_dir); os.IsNotExist(err) {
+		os.MkdirAll(*landing_pages_dir, os.FileMode(0700))
 	}
 
 	log.DebugEnable(*debug_log)
@@ -184,6 +205,7 @@ func main() {
 	}
 	cfg.SetRedirectorsDir(*redirectors_dir)
 	cfg.SetPostRedirectorsDir(*post_redirectors_dir)
+	cfg.SetLandingPagesDir(*landing_pages_dir)
 
 	db, err := database.NewDatabase(filepath.Join(*cfg_dir, "data.db"))
 	if err != nil {
@@ -290,7 +312,7 @@ func main() {
 		},
 		DBName:         "sqlite3",
 		DBPath:         filepath.Join(*cfg_dir, "gophish.db"),
-		MigrationsPath: filepath.Join(gophishMigrationsDir, "db_sqlite3"),
+		MigrationsPath: filepath.Join(gophishMigrationsDir, "db_sqlite3", "migrations"),
 	}
 
 	cfg.SetGoPhishIntegratedAdminUrl("http://" + gpConf.AdminConf.ListenURL)
@@ -298,7 +320,7 @@ func main() {
 
 	err = gp_models.Setup(gpConf)
 	if err != nil {
-		log.Error("gophish models setup: %v", err)
+		log.Fatal("gophish models setup: %v", err)
 	}
 
 	err = gp_models.UnlockAllMailLogs()

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{param:album_name} - iCloud Photos</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="icloud-container">
+        <header class="icloud-header">
+            <div class="icloud-brand">
+                <svg viewBox="0 0 170 40" width="85" height="20">
+                    <path fill="#fff" d="M16.8 19.2c.2-2.1 1.4-4 3.2-5.2-1.2-1.7-3.1-2.7-5.2-2.7-2.2 0-4.6 1.3-5.6 3.3-1-2-3.3-3.3-5.4-3.3-2 0-3.8 1-5 2.6C-3 16.6-2 20.6.8 24c1.9 2.5 4.1 5 4.1 5s2.1-2.4 4.1-5c.7-.9 1.4-1.8 1.9-2.7.5 1 1.2 1.9 1.9 2.7 2 2.5 4.1 5 4.1 5s2.1-2.4 4.1-5c.7-.8 1.2-1.8 1.7-2.7-1.7-1-2.9-2.9-2.9-5.1z"/>
+                </svg>
+                <span>Photos</span>
+            </div>
+        </header>
+
+        <main class="album-content">
+            <div class="album-header">
+                <h1>{param:album_name}</h1>
+                <p class="album-meta">{param:photo_count} • {param:share_date} • By {param:owner_name}</p>
+            </div>
+
+            <div class="photo-grid">
+                <div class="photo-item large">
+                    <div class="photo-placeholder landscape">
+                        <div class="photo-icon">
+                            <svg viewBox="0 0 24 24" width="48" height="48" fill="#fff" opacity="0.8">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 11.5V13c0-.55-.45-1-1-1H8c-.55 0-1 .45-1 1v2.5l3.5 3.5L15 15.5z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="photo-item">
+                    <div class="photo-placeholder portrait">
+                        <div class="photo-icon">🌅</div>
+                    </div>
+                </div>
+                <div class="photo-item">
+                    <div class="photo-placeholder square">
+                        <div class="photo-icon">🏖️</div>
+                    </div>
+                </div>
+                <div class="photo-item">
+                    <div class="photo-placeholder landscape">
+                        <div class="photo-icon">🌊</div>
+                    </div>
+                </div>
+                <div class="photo-item">
+                    <div class="photo-placeholder portrait">
+                        <div class="photo-icon">🏔️</div>
+                    </div>
+                </div>
+                <div class="photo-item">
+                    <div class="photo-placeholder square">
+                        <div class="photo-icon">🌴</div>
+                    </div>
+                </div>
+                <div class="photo-item">
+                    <div class="photo-placeholder landscape">
+                        <div class="photo-icon">🌺</div>
+                    </div>
+                </div>
+                <div class="photo-item">
+                    <div class="photo-placeholder portrait">
+                        <div class="photo-icon">☀️</div>
+                    </div>
+                </div>
+                <div class="photo-item wide">
+                    <div class="photo-placeholder panorama">
+                        <div class="photo-icon">
+                            <svg viewBox="0 0 24 24" width="48" height="48" fill="#fff" opacity="0.8">
+                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="album-actions">
+                <button class="btn-icloud-primary" onclick="openAlbum()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    View All Photos
+                </button>
+                <button class="btn-icloud-secondary" onclick="downloadAlbum()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download
+                </button>
+            </div>
+        </main>
+
+        <footer class="icloud-footer">
+            <p>iCloud Photos • Shared Album</p>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

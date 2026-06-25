@@ -1,159 +1,641 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Evilginx - Login</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css">
-    <link rel="stylesheet" href="css/login.css">
-    <link data-rh="true" rel="icon" href="/img/cookie.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Evilginx | Admin Login</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-dark-elevated: #1e293b;
+            --text-dark: #f1f5f9;
+            --text-dark-secondary: #94a3b8;
+            --border-dark: #334155;
+            --glass-bg-dark: rgba(15, 23, 42, 0.8);
+            --glass-border-dark: rgba(255, 255, 255, 0.1);
+            --shadow-dark-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+            animation: bgMove 20s ease-in-out infinite;
+        }
+
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(2%, 2%) rotate(1deg); }
+            66% { transform: translate(-1%, 1%) rotate(-1deg); }
+        }
+
+        /* Grid Lines */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Login Container */
+        .login-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Login Card */
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border-dark);
+            border-radius: var(--radius-xl);
+            padding: 3rem;
+            box-shadow: var(--shadow-dark-lg);
+            animation: cardEntry 0.6s ease;
+        }
+
+        @keyframes cardEntry {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Logo */
+        .login-logo {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-gradient);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+            animation: logoPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 12px 40px rgba(99, 102, 241, 0.5); }
+        }
+
+        .login-logo h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-logo p {
+            color: var(--text-dark-secondary);
+            font-size: 0.9375rem;
+        }
+
+        /* Form */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dark-secondary);
+            font-size: 1.25rem;
+            transition: color 0.2s;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 1px solid var(--border-dark);
+            border-radius: var(--radius-md);
+            background: rgba(30, 41, 59, 0.5);
+            color: var(--text-dark);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-dark-secondary);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .input-group input:focus + .input-icon,
+        .input-group input:not(:placeholder-shown) + .input-icon {
+            color: var(--primary);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-dark-secondary);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: color 0.2s;
+        }
+
+        .toggle-password:hover {
+            color: var(--text-dark);
+        }
+
+        /* Error Message */
+        .error-message {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius-md);
+            color: var(--danger);
+            font-size: 0.875rem;
+            animation: shake 0.5s ease;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .submit-btn i {
+            font-size: 1.25rem;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--text-dark-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Change Password Form */
+        .change-password-info {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: var(--radius-md);
+            color: #fbbf24;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 2rem;
+            }
+            
+            .login-logo h1 {
+                font-size: 1.5rem;
+            }
+            
+            .logo-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+        }
+
+        /* Success State */
+        .success-state {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            color: var(--success);
+        }
+    </style>
 </head>
 <body>
-    <div class="loginbox">
-        <div class="logincard">
-            <img src="/img/cookie.png" alt="Logo">
-            <form id="loginForm" autocomplete="off">
-                <div class="details">
-                    <input type="text" id="username" name="username" placeholder="Username" required autofocus>
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
+    
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="logo-icon">
+                    <i class="ri-shield-keyhole-fill"></i>
                 </div>
-                <div class="details">
-                    <input type="password" id="password" name="password" placeholder="Password" required>
+                <h1>Evilginx</h1>
+                <p>Admin Dashboard Login</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="login-form">
+                <div class="input-group">
+                    <i class="ri-user-3-line input-icon"></i>
+                    <input type="text" id="username" placeholder="Username" required autofocus>
                 </div>
-                <p id="errorMsg" class="err"></p>
-                <button type="submit">Login</button>
+                
+                <div class="input-group">
+                    <i class="ri-lock-password-line input-icon"></i>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <button type="button" class="toggle-password" onclick="togglePassword()">
+                        <i class="ri-eye-off-line" id="passwordToggle"></i>
+                    </button>
+                </div>
+                
+                <div class="error-message" id="errorMessage">
+                    <i class="ri-error-warning-line"></i>
+                    <span id="errorText">Invalid credentials</span>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span id="btnText">Sign In</span>
+                    <i class="ri-arrow-right-line" id="btnIcon"></i>
+                </button>
             </form>
-            <form id="changePasswordForm" autocomplete="off" style="display:none;">
-                <p id="changePasswordInfo" style="margin: 0 0 12px; text-align: center;">
-                    Change the default admin password before using the web admin UI.
-                </p>
-                <div class="details">
-                    <input type="password" id="currentPassword" name="currentPassword" placeholder="Current Password" required>
+            
+            <!-- Change Password Form -->
+            <form id="changePasswordForm" class="login-form" style="display: none;">
+                <div class="change-password-info">
+                    <i class="ri-shield-alert-line"></i>
+                    <span>Change default password before continuing</span>
                 </div>
-                <div class="details">
-                    <input type="password" id="replacementPassword" name="replacementPassword" placeholder="New Password" required>
+                
+                <input type="hidden" id="currentPasswordHidden">
+                
+                <div class="input-group">
+                    <i class="ri-lock-password-line input-icon"></i>
+                    <input type="password" id="newPassword" placeholder="New Password" required>
                 </div>
-                <p id="changePasswordError" class="err"></p>
-                <button type="submit">Change Password</button>
+                
+                <div class="input-group">
+                    <i class="ri-lock-check-line input-icon"></i>
+                    <input type="password" id="confirmPassword" placeholder="Confirm New Password" required>
+                </div>
+                
+                <div class="error-message" id="changePasswordError">
+                    <i class="ri-error-warning-line"></i>
+                    <span id="changePasswordErrorText"></span>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="changeBtn">
+                    <span id="changeBtnText">Set Password</span>
+                    <i class="ri-arrow-right-line" id="changeBtnIcon"></i>
+                </button>
             </form>
+            
+            <div class="login-footer">
+                <p>Protected by Evilginx Security</p>
+            </div>
         </div>
     </div>
+    
     <script>
-        var loginForm = document.getElementById('loginForm');
-        var changePasswordForm = document.getElementById('changePasswordForm');
-        var errorMsg = document.getElementById('errorMsg');
-        var changePasswordError = document.getElementById('changePasswordError');
-        var currentPasswordInput = document.getElementById('currentPassword');
-        var replacementPasswordInput = document.getElementById('replacementPassword');
-
-        function showLoginForm() {
-            loginForm.style.display = '';
-            changePasswordForm.style.display = 'none';
-            errorMsg.textContent = '';
-            changePasswordError.textContent = '';
+        // Toggle password visibility
+        function togglePassword() {
+            const password = document.getElementById('password');
+            const toggle = document.getElementById('passwordToggle');
+            
+            if (password.type === 'password') {
+                password.type = 'text';
+                toggle.className = 'ri-eye-line';
+            } else {
+                password.type = 'password';
+                toggle.className = 'ri-eye-off-line';
+            }
         }
-
-        function showChangePasswordForm(currentPassword) {
-            loginForm.style.display = 'none';
-            changePasswordForm.style.display = '';
-            errorMsg.textContent = '';
-            changePasswordError.textContent = '';
-            currentPasswordInput.value = currentPassword || '';
-            replacementPasswordInput.value = '';
-            replacementPasswordInput.focus();
+        
+        // Show error
+        function showError(message) {
+            const error = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            error.classList.add('show');
+            
+            // Remove animation class after it plays
+            setTimeout(() => {
+                error.style.animation = 'none';
+            }, 500);
         }
-
-        loginForm.addEventListener('submit', function (e) {
+        
+        function hideError() {
+            const error = document.getElementById('errorMessage');
+            error.classList.remove('show');
+            error.style.animation = '';
+        }
+        
+        // Show loading state
+        function setLoading(loading) {
+            const btn = document.getElementById('submitBtn');
+            const text = document.getElementById('btnText');
+            const icon = document.getElementById('btnIcon');
+            
+            if (loading) {
+                btn.disabled = true;
+                text.textContent = 'Signing in...';
+                icon.outerHTML = '<div class="spinner"></div>';
+            } else {
+                btn.disabled = false;
+                text.textContent = 'Sign In';
+                btn.querySelector('.spinner').outerHTML = '<i class="ri-arrow-right-line" id="btnIcon"></i>';
+            }
+        }
+        
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            errorMsg.textContent = '';
-
-            var username = document.getElementById('username').value.trim();
-            var password = document.getElementById('password').value;
-
+            hideError();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
             if (!username || !password) {
-                errorMsg.textContent = 'Please fill in all fields';
+                showError('Please enter both username and password');
                 return;
             }
-
-            fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: username, password: password })
-            })
-            .then(function (res) {
-                return res.json().then(function (data) {
-                    if (res.ok) {
-                        if (data.must_change_password) {
-                            showChangePasswordForm(password);
-                            return;
-                        }
-                        window.location.href = '/';
-                        return;
-                    }
-                    errorMsg.textContent = data.error || 'Invalid credentials';
-                }).catch(function () {
-                    errorMsg.textContent = 'Invalid credentials';
+            
+            setLoading(true);
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
                 });
-            })
-            .catch(function () {
-                errorMsg.textContent = 'Connection error';
-            });
-        });
-
-        changePasswordForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            changePasswordError.textContent = '';
-
-            var currentPassword = currentPasswordInput.value;
-            var replacementPassword = replacementPasswordInput.value;
-
-            if (!currentPassword || !replacementPassword) {
-                changePasswordError.textContent = 'Please fill in all fields';
-                return;
-            }
-
-            fetch('/api/auth/change-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ old_password: currentPassword, new_password: replacementPassword })
-            })
-            .then(function (res) {
-                return res.json().then(function (data) {
-                    if (res.ok) {
-                        window.location.href = '/';
-                        return;
-                    }
-                    changePasswordError.textContent = data.error || 'Failed to change password';
-                }).catch(function () {
-                    changePasswordError.textContent = 'Failed to change password';
-                });
-            })
-            .catch(function () {
-                changePasswordError.textContent = 'Connection error';
-            });
-        });
-
-        fetch('/api/auth/check')
-            .then(function (res) {
-                if (res.status === 401) {
-                    showLoginForm();
-                    return null;
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Login failed');
                 }
-                return res.json().catch(function () { return null; });
-            })
-            .then(function (data) {
+                
+                if (data.must_change_password) {
+                    showChangePasswordForm(password);
+                } else {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                setLoading(false);
+                showError(error.message || 'Connection error');
+            }
+        });
+        
+        // Show change password form
+        function showChangePasswordForm(currentPassword) {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('changePasswordForm').style.display = 'flex';
+            document.getElementById('currentPasswordHidden').value = currentPassword;
+        }
+        
+        // Change password form
+        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPasswordHidden').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorDiv = document.getElementById('changePasswordError');
+            const errorText = document.getElementById('changePasswordErrorText');
+            
+            if (newPassword !== confirmPassword) {
+                errorText.textContent = 'Passwords do not match';
+                errorDiv.classList.add('show');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                errorText.textContent = 'Password must be at least 8 characters';
+                errorDiv.classList.add('show');
+                return;
+            }
+            
+            const btn = document.getElementById('changeBtn');
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/auth/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        old_password: currentPassword, 
+                        new_password: newPassword 
+                    })
+                });
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to change password');
+                }
+                
+                window.location.href = '/';
+            } catch (error) {
+                errorText.textContent = error.message;
+                errorDiv.classList.add('show');
+                btn.disabled = false;
+            }
+        });
+        
+        // Check auth status on load
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/check');
+                
+                if (response.status === 401) {
+                    // Not authenticated, show login
+                    return;
+                }
+                
+                const data = await response.json();
+                
                 if (!data || !data.authenticated) {
                     return;
                 }
+                
                 if (data.must_change_password) {
                     showChangePasswordForm('');
-                    return;
+                } else {
+                    window.location.href = '/';
                 }
-                window.location.href = '/';
-            })
-            .catch(function () {
-                showLoginForm();
-            });
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            }
+        }
+        
+        // Run auth check
+        checkAuth();
     </script>
 </body>
 </html>

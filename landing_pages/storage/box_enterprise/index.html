@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{param:folder_name} - Box</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="box-container">
+        <header class="box-header">
+            <div class="box-logo">
+                <svg viewBox="0 0 32 32" width="32" height="32">
+                    <path fill="#0061D5" d="M27.6 12.4L19.8 5l-5.7 6.2L8.5 5 .6 12.4l8.1 9.5-8.1 8.9 19.2.1 7.9-9-7.9-9.5zm-16 14.2l-7.3-8 3.7-4.3 7.3 8.6-3.7 3.7zm7.3-3.7l-7.3-8.6 3.6-4 7.3 8.6-3.6 4zm0-12.3l-3.6-4.1 3.6-3.9 7.3 8.6-7.3 8.6-3.6-4 3.6-4.1z"/>
+                </svg>
+                <span>Box</span>
+            </div>
+            <div class="box-user">
+                <div class="user-menu">{param:company_name}</div>
+            </div>
+        </header>
+
+        <main class="box-main">
+            <div class="content-header">
+                <h1>{param:folder_name}</h1>
+                <p class="shared-info">Shared by {param:shared_by}</p>
+            </div>
+
+            <div class="file-browser">
+                <div class="browser-header">
+                    <div class="col-name">Name</div>
+                    <div class="col-date">Modified</div>
+                    <div class="col-size">Size</div>
+                </div>
+                
+                <div class="file-row">
+                    <div class="file-info">
+                        <svg class="file-icon folder" viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="#F5C518" d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                        </svg>
+                        <span class="file-name">Q1_Reports</span>
+                    </div>
+                    <div class="file-date">Jan 15, 2024</div>
+                    <div class="file-size">--</div>
+                    <button class="btn-action" onclick="accessFile()">Open</button>
+                </div>
+                
+                <div class="file-row">
+                    <div class="file-info">
+                        <svg class="file-icon xls" viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="#217346" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                            <text x="12" y="17" font-size="7" fill="#fff" text-anchor="middle">XLS</text>
+                        </svg>
+                        <span class="file-name">Budget_Summary_Q4.xlsx</span>
+                    </div>
+                    <div class="file-date">Dec 28, 2023</div>
+                    <div class="file-size">2.4 MB</div>
+                    <button class="btn-action" onclick="accessFile()">Open</button>
+                </div>
+                
+                <div class="file-row">
+                    <div class="file-info">
+                        <svg class="file-icon pdf" viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="#F40F02" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                            <text x="12" y="17" font-size="7" fill="#fff" text-anchor="middle">PDF</text>
+                        </svg>
+                        <span class="file-name">Annual_Report_2024.pdf</span>
+                    </div>
+                    <div class="file-date">Dec 20, 2023</div>
+                    <div class="file-size">8.7 MB</div>
+                    <button class="btn-action" onclick="accessFile()">Open</button>
+                </div>
+                
+                <div class="file-row">
+                    <div class="file-info">
+                        <svg class="file-icon ppt" viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="#D24726" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                            <text x="12" y="17" font-size="6" fill="#fff" text-anchor="middle">PPT</text>
+                        </svg>
+                        <span class="file-name">Board_Presentation.pptx</span>
+                    </div>
+                    <div class="file-date">Dec 15, 2023</div>
+                    <div class="file-size">15.2 MB</div>
+                    <button class="btn-action" onclick="accessFile()">Open</button>
+                </div>
+            </div>
+
+            <div class="folder-actions">
+                <button class="btn-box-primary" onclick="accessFolder()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    Open Folder
+                </button>
+                <button class="btn-box-secondary" onclick="downloadFolder()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download
+                </button>
+            </div>
+        </main>
+
+        <footer class="box-footer">
+            <p>© Box • Enterprise Content Cloud • <a href="#">Privacy</a> • <a href="#">Terms</a></p>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

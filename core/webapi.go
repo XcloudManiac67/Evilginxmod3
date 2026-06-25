@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -109,6 +112,14 @@ func (w *WebAPI) Start(port int) {
 	mux.HandleFunc("/api/lures/get-url", w.requireAuth(w.handleLureGetUrl))
 	mux.HandleFunc("/api/lures/create", w.requireOperator(w.handleLureCreate))
 	mux.HandleFunc("/api/lures/delete", w.requireOperator(w.handleLureDelete))
+	mux.HandleFunc("/api/lures/external-redirect", w.requireOperator(w.handleLureExternalRedirect))
+
+	// Landing page endpoints — reads: any auth; mutations: operator+
+	mux.HandleFunc("/api/landing-pages", w.requireAuth(w.handleLandingPages))
+	mux.HandleFunc("/api/landing-pages/", w.requireAuth(w.handleLandingPageDetail))
+	mux.HandleFunc("/api/landing-pages/preview", w.requireAuth(w.handleLandingPagePreview))
+	mux.HandleFunc("/api/lures/landing-page", w.requireOperator(w.handleLureLandingPage))
+	mux.HandleFunc("/api/lures/landing-config", w.requireOperator(w.handleLureLandingConfig))
 
 	// GoPhish endpoints (read-only)
 	mux.HandleFunc("/api/gophish/campaigns", w.requireAuth(w.handleGophishCampaigns))
@@ -842,17 +853,19 @@ func (w *WebAPI) handleLures(rw http.ResponseWriter, req *http.Request) {
 				"phishlet":        l.Phishlet,
 				"hostname":        hostname,
 				"path":            l.Path,
-				"redirect_url":    l.RedirectUrl,
-				"redirector":      l.Redirector,
-				"post_redirector": l.PostRedirector,
-				"ua_filter":       l.UserAgentFilter,
-				"info":            l.Info,
-				"og_title":        l.OgTitle,
-				"og_desc":         l.OgDescription,
-				"og_image":        l.OgImageUrl,
-				"og_url":          l.OgUrl,
-				"paused_until":    l.PausedUntil,
-			})
+			"redirect_url":           l.RedirectUrl,
+			"redirector":             l.Redirector,
+			"post_redirector":        l.PostRedirector,
+			"ua_filter":              l.UserAgentFilter,
+			"info":                   l.Info,
+			"og_title":               l.OgTitle,
+			"og_desc":                l.OgDescription,
+			"og_image":               l.OgImageUrl,
+			"og_url":                 l.OgUrl,
+			"paused_until":           l.PausedUntil,
+			"use_external_redirect":  l.UseExternalRedirect,
+			"external_redirect_url":  l.ExternalRedirectUrl,
+		})
 		}
 	}
 
@@ -930,12 +943,14 @@ func (w *WebAPI) handleLureCreate(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	var payload struct {
-		Phishlet       string `json:"phishlet"`
-		Path           string `json:"path"`
-		RedirectUrl    string `json:"redirect_url"`
-		Redirector     string `json:"redirector"`
-		PostRedirector string `json:"post_redirector"`
-		Info           string `json:"info"`
+		Phishlet            string `json:"phishlet"`
+		Path                string `json:"path"`
+		RedirectUrl         string `json:"redirect_url"`
+		Redirector          string `json:"redirector"`
+		PostRedirector      string `json:"post_redirector"`
+		Info                string `json:"info"`
+		UseExternalRedirect bool   `json:"use_external_redirect"`
+		ExternalRedirectUrl string `json:"external_redirect_url"`
 	}
 	if err := json.NewDecoder(req.Body).Decode(&payload); err != nil {
 		rw.Header().Set("Content-Type", "application/json")
@@ -960,12 +975,14 @@ func (w *WebAPI) handleLureCreate(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	l := &Lure{
-		Phishlet:       payload.Phishlet,
-		Path:           payload.Path,
-		RedirectUrl:    payload.RedirectUrl,
-		Redirector:     payload.Redirector,
-		PostRedirector: payload.PostRedirector,
-		Info:           payload.Info,
+		Phishlet:            payload.Phishlet,
+		Path:                payload.Path,
+		RedirectUrl:         payload.RedirectUrl,
+		Redirector:          payload.Redirector,
+		PostRedirector:      payload.PostRedirector,
+		Info:                payload.Info,
+		UseExternalRedirect: payload.UseExternalRedirect,
+		ExternalRedirectUrl: payload.ExternalRedirectUrl,
 	}
 	w.cfg.AddLure(payload.Phishlet, l)
 
@@ -1016,6 +1033,281 @@ func (w *WebAPI) handleLureDelete(rw http.ResponseWriter, req *http.Request) {
 
 	rw.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(rw).Encode(map[string]string{"message": "Lure deleted"})
+}
+
+func (w *WebAPI) handleLureExternalRedirect(rw http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		http.Error(rw, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var payload struct {
+		Index               int    `json:"index"`
+		UseExternalRedirect bool   `json:"use_external_redirect"`
+		ExternalRedirectUrl string `json:"external_redirect_url"`
+	}
+	if err := json.NewDecoder(req.Body).Decode(&payload); err != nil {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(map[string]string{"error": "invalid request body"})
+		return
+	}
+
+	l, err := w.cfg.GetLure(payload.Index)
+	if err != nil {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(rw).Encode(map[string]string{"error": "lure not found"})
+		return
+	}
+
+	// Validate URL if enabled
+	if payload.UseExternalRedirect && payload.ExternalRedirectUrl != "" {
+		u, err := url.Parse(payload.ExternalRedirectUrl)
+		if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
+			rw.Header().Set("Content-Type", "application/json")
+			rw.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(rw).Encode(map[string]string{"error": "invalid redirect URL - must be a valid http:// or https:// URL"})
+			return
+		}
+	}
+
+	l.UseExternalRedirect = payload.UseExternalRedirect
+	l.ExternalRedirectUrl = payload.ExternalRedirectUrl
+
+	if err := w.cfg.SetLure(payload.Index, l); err != nil {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	user, _ := w.getUserFromRequest(req)
+	username := "unknown"
+	if user != nil {
+		username = user.Username
+	}
+	clientIP := getClientIP(req)
+	action := "disabled"
+	if payload.UseExternalRedirect {
+		action = fmt.Sprintf("enabled (URL: %s)", payload.ExternalRedirectUrl)
+	}
+	w.db.CreateAuditEntry(username, "update_lure_redirect", fmt.Sprintf("External redirect %s for lure at index %d", action, payload.Index), clientIP)
+
+	rw.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(rw).Encode(map[string]string{"message": "External redirect settings updated"})
+}
+
+// ---------- Landing Pages ----------
+
+func (w *WebAPI) handleLandingPages(rw http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		http.Error(rw, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	templates, err := w.cfg.ListLandingPageTemplates()
+	if err != nil {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	writeJSON(rw, http.StatusOK, templates)
+}
+
+func (w *WebAPI) handleLandingPageDetail(rw http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		http.Error(rw, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract template ID from path
+	pathParts := strings.Split(strings.Trim(req.URL.Path, "/"), "/")
+	if len(pathParts) < 3 {
+		http.Error(rw, "invalid path", http.StatusBadRequest)
+		return
+	}
+
+	// Path format: api/landing-pages/{category}/{template}
+	if len(pathParts) >= 4 {
+		category := pathParts[2]
+		templateID := pathParts[3]
+		fullTemplateID := fmt.Sprintf("%s/%s", category, templateID)
+
+		template, err := w.cfg.GetLandingPageTemplate(fullTemplateID)
+		if err != nil {
+			rw.Header().Set("Content-Type", "application/json")
+			rw.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(rw).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+
+		writeJSON(rw, http.StatusOK, template)
+		return
+	}
+
+	http.Error(rw, "invalid path", http.StatusBadRequest)
+}
+
+func (w *WebAPI) handleLandingPagePreview(rw http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		http.Error(rw, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	templateID := req.URL.Query().Get("id")
+	if templateID == "" {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(map[string]string{"error": "id query parameter is required"})
+		return
+	}
+
+	template, err := w.cfg.GetLandingPageTemplate(templateID)
+	if err != nil {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(rw).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	// Read the template HTML file
+	landingPagesDir := w.cfg.GetLandingPagesDir()
+	indexPath := filepath.Join(landingPagesDir, template.Category, template.ID, "index.html")
+
+	html, err := os.ReadFile(indexPath)
+	if err != nil {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(rw).Encode(map[string]string{"error": "template HTML not found"})
+		return
+	}
+
+	// Replace placeholders with sample values for preview
+	body := string(html)
+	body = strings.Replace(body, "{lure_url}", "https://example.com/lure", -1)
+	body = strings.Replace(body, "{lure_url_js}", "https://example.com/lure", -1)
+	body = strings.Replace(body, "{lure_url_html}", "https://example.com/lure", -1)
+	body = strings.Replace(body, "{timestamp}", fmt.Sprintf("%d", time.Now().Unix()), -1)
+	body = strings.Replace(body, "{random_id}", "preview123", -1)
+
+	// Replace any {param:xxx} with sample values
+	for _, param := range template.Params {
+		placeholder := fmt.Sprintf("{param:%s}", param.ID)
+		body = strings.Replace(body, placeholder, param.Default, -1)
+	}
+
+	rw.Header().Set("Content-Type", "text/html")
+	rw.WriteHeader(http.StatusOK)
+	rw.Write([]byte(body))
+}
+
+func (w *WebAPI) handleLureLandingPage(rw http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case http.MethodPost:
+		var payload struct {
+			LureIndex     int               `json:"lure_index"`
+			TemplateID    string            `json:"template_id"`
+			LandingConfig map[string]string `json:"landing_config"`
+		}
+		if err := json.NewDecoder(req.Body).Decode(&payload); err != nil {
+			writeJSON(rw, http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+			return
+		}
+
+		l, err := w.cfg.GetLure(payload.LureIndex)
+		if err != nil {
+			writeJSON(rw, http.StatusBadRequest, map[string]string{"error": err.Error()})
+			return
+		}
+
+		// Verify template exists
+		_, err = w.cfg.GetLandingPageTemplate(payload.TemplateID)
+		if err != nil {
+			writeJSON(rw, http.StatusBadRequest, map[string]string{"error": err.Error()})
+			return
+		}
+
+		l.LandingPage = payload.TemplateID
+		if payload.LandingConfig != nil {
+			l.LandingConfig = payload.LandingConfig
+		}
+
+		err = w.cfg.SetLure(payload.LureIndex, l)
+		if err != nil {
+			writeJSON(rw, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
+
+		writeJSON(rw, http.StatusOK, map[string]string{"message": "Landing page assigned successfully"})
+
+	case http.MethodDelete:
+		var payload struct {
+			LureIndex int `json:"lure_index"`
+		}
+		if err := json.NewDecoder(req.Body).Decode(&payload); err != nil {
+			writeJSON(rw, http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+			return
+		}
+
+		l, err := w.cfg.GetLure(payload.LureIndex)
+		if err != nil {
+			writeJSON(rw, http.StatusBadRequest, map[string]string{"error": err.Error()})
+			return
+		}
+
+		l.LandingPage = ""
+		l.LandingConfig = nil
+
+		err = w.cfg.SetLure(payload.LureIndex, l)
+		if err != nil {
+			writeJSON(rw, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
+
+		writeJSON(rw, http.StatusOK, map[string]string{"message": "Landing page removed successfully"})
+
+	default:
+		http.Error(rw, "method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func (w *WebAPI) handleLureLandingConfig(rw http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPut {
+		http.Error(rw, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var payload struct {
+		LureIndex     int               `json:"lure_index"`
+		LandingConfig map[string]string `json:"landing_config"`
+	}
+	if err := json.NewDecoder(req.Body).Decode(&payload); err != nil {
+		writeJSON(rw, http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+		return
+	}
+
+	l, err := w.cfg.GetLure(payload.LureIndex)
+	if err != nil {
+		writeJSON(rw, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return
+	}
+
+	if l.LandingPage == "" {
+		writeJSON(rw, http.StatusBadRequest, map[string]string{"error": "no landing page assigned to lure"})
+		return
+	}
+
+	l.LandingConfig = payload.LandingConfig
+	err = w.cfg.SetLure(payload.LureIndex, l)
+	if err != nil {
+		writeJSON(rw, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+
+	writeJSON(rw, http.StatusOK, map[string]string{"message": "Landing page configuration updated"})
 }
 
 // ---------- GoPhish ----------

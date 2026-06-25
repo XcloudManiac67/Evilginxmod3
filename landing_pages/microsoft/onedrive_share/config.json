@@ -1,0 +1,38 @@
+{
+  "id": "onedrive_share",
+  "name": "OneDrive File Sharing",
+  "category": "microsoft",
+  "description": "OneDrive file browser UI with folder and file sharing appearance",
+  "version": "1.0.0",
+  "params": [
+    {
+      "id": "folder_name",
+      "label": "Folder Name",
+      "type": "text",
+      "default": "Project Files",
+      "placeholder": "Folder name"
+    },
+    {
+      "id": "item_count",
+      "label": "Item Count",
+      "type": "text",
+      "default": "12 files",
+      "placeholder": "e.g., 12 files, 3 items"
+    },
+    {
+      "id": "sender_name",
+      "label": "Sender Name",
+      "type": "text",
+      "default": "Sarah Johnson",
+      "placeholder": "Name of sender"
+    },
+    {
+      "id": "share_date",
+      "label": "Share Date",
+      "type": "text",
+      "default": "Today at 2:30 PM",
+      "placeholder": "e.g., Today at 2:30 PM"
+    }
+  ],
+  "features": ["responsive", "animated"]
+}

@@ -2,6 +2,11 @@ release/
 build/
 private/
 
+# Binaries and local runtime artifacts
+*.exe
+*.db
+test-run/
+evilginx-test*/
 
 # Temporary files
 *.swp

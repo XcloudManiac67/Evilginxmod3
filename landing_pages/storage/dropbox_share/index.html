@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{param:file_name} - Dropbox</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="dropbox-container">
+        <header class="dropbox-header">
+            <div class="dropbox-logo">
+                <svg viewBox="0 0 48 40" width="48" height="40">
+                    <path fill="#0061FF" d="M12 0L0 8l12 8L24 8 12 0zM36 0L24 8l12 8 12-8L36 0zM0 24l12 8 12-8-12-8-12 8zM36 16l-12 8 12 8 12-8-12-8zM24 32l-12-8-12 8 24 8 24-8-12-8-12 8z"/>
+                </svg>
+                <span>Dropbox</span>
+            </div>
+        </header>
+
+        <main class="share-main">
+            <div class="file-preview-card">
+                <div class="file-icon-large">
+                    <svg viewBox="0 0 24 24" width="80" height="80">
+                        <path fill="#0061FF" d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/>
+                    </svg>
+                </div>
+                <h1 class="file-title">{param:file_name}</h1>
+                <p class="file-subtitle">{param:file_size}</p>
+                <p class="share-info">Shared by {param:shared_by} • {param:share_date}</p>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-download-primary" onclick="downloadFile()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download
+                </button>
+                <button class="btn-preview" onclick="previewFile()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Preview
+                </button>
+            </div>
+
+            <div class="signin-prompt">
+                <p>Sign in to save to Dropbox or download directly</p>
+                <button class="btn-signin" onclick="signIn()">Sign in to Dropbox</button>
+            </div>
+        </main>
+
+        <footer class="dropbox-footer">
+            <p>© 2024 Dropbox • <a href="#">Terms</a> • <a href="#">Privacy</a></p>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

