@@ -53,7 +53,7 @@ func stapleOCSP(ctx context.Context, ocspConfig OCSPConfig, storage Storage, cer
 		// we need a PEM encoding only for some function calls below
 		bundle := new(bytes.Buffer)
 		for _, derBytes := range cert.Certificate.Certificate {
-			pem.Encode(bundle, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
+			_ = pem.Encode(bundle, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
 		}
 		pemBundle = bundle.Bytes()
 	}
@@ -93,11 +93,16 @@ func stapleOCSP(ctx context.Context, ocspConfig OCSPConfig, storage Storage, cer
 	// then we need to request it from the OCSP responder
 	if ocspResp == nil || len(ocspBytes) == 0 {
 		ocspBytes, ocspResp, ocspErr = getOCSPForCert(ocspConfig, pemBundle)
+		// An error here is not a problem because a certificate
+		// may simply not contain a link to an OCSP server.
 		if ocspErr != nil {
-			// An error here is not a problem because a certificate may simply
-			// not contain a link to an OCSP server. But we should log it anyway.
+			// For short-lived certificates, this is fine and we can ignore
+			// logging because OCSP doesn't make much sense for them anyway.
+			if cert.Lifetime() < 7*24*time.Hour {
+				return nil
+			}
 			// There's nothing else we can do to get OCSP for this certificate,
-			// so we can return here with the error.
+			// so we can return here with the error to warn about it.
 			return fmt.Errorf("no OCSP stapling for %v: %w", cert.Names, ocspErr)
 		}
 		gotNewOCSP = true
@@ -168,12 +173,24 @@ func getOCSPForCert(ocspConfig OCSPConfig, bundle []byte) ([]byte, *ocsp.Respons
 		return nil, nil, fmt.Errorf("override disables querying OCSP responder: %v", issuedCert.OCSPServer[0])
 	}
 
+	// configure HTTP client if necessary
+	httpClient := http.DefaultClient
+	if ocspConfig.HTTPProxy != nil {
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				Proxy: ocspConfig.HTTPProxy,
+			},
+			Timeout: 30 * time.Second,
+		}
+	}
+
+	// get issuer certificate if needed
 	if len(certificates) == 1 {
 		if len(issuedCert.IssuingCertificateURL) == 0 {
 			return nil, nil, fmt.Errorf("no URL to issuing certificate")
 		}
 
-		resp, err := http.Get(issuedCert.IssuingCertificateURL[0])
+		resp, err := httpClient.Get(issuedCert.IssuingCertificateURL[0])
 		if err != nil {
 			return nil, nil, fmt.Errorf("getting issuer certificate: %v", err)
 		}
@@ -202,7 +219,7 @@ func getOCSPForCert(ocspConfig OCSPConfig, bundle []byte) ([]byte, *ocsp.Respons
 	}
 
 	reader := bytes.NewReader(ocspReq)
-	req, err := http.Post(respURL, "application/ocsp-request", reader)
+	req, err := httpClient.Post(respURL, "application/ocsp-request", reader)
 	if err != nil {
 		return nil, nil, fmt.Errorf("making OCSP request: %v", err)
 	}
@@ -216,6 +233,10 @@ func getOCSPForCert(ocspConfig OCSPConfig, bundle []byte) ([]byte, *ocsp.Respons
 	ocspRes, err := ocsp.ParseResponse(ocspResBytes, issuerCert)
 	if err != nil {
 		return nil, nil, fmt.Errorf("parsing OCSP response: %v", err)
+	}
+
+	if err := validateOCSPResponder(ocspRes, issuerCert); err != nil {
+		return nil, nil, fmt.Errorf("OCSP responder authorization check failed: %v", err)
 	}
 
 	return ocspResBytes, ocspRes, nil
@@ -235,4 +256,27 @@ func freshOCSP(resp *ocsp.Response) bool {
 	// start checking OCSP staple about halfway through validity period for good measure
 	refreshTime := resp.ThisUpdate.Add(nextUpdate.Sub(resp.ThisUpdate) / 2)
 	return time.Now().Before(refreshTime)
+}
+
+// validateOCSPResponder enforces RFC 6960 §4.2.2.2: "Systems or applications that
+// rely on OCSP responses MUST be capable of detecting and enforcing the use of the
+// id-kp-OCSPSigning value." An issuer-signed response (where the embedded Certificate
+// field is nil, meaning the issuer signed directly) is always acceptable.
+func validateOCSPResponder(ocspResp *ocsp.Response, issuerCert *x509.Certificate) error {
+	respCert := ocspResp.Certificate
+
+	// if response was signed directly by the issuer, or embedded responder cert IS the issuer, accept
+	if respCert == nil || respCert.Equal(issuerCert) {
+		// Response was signed directly by the issuer — always valid.
+		return nil
+	}
+
+	// RFC 6960 §4.2.2.2 requires id-kp-OCSPSigning for delegated responders
+	for _, eku := range respCert.ExtKeyUsage {
+		if eku == x509.ExtKeyUsageOCSPSigning {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("OCSP responder certificate (subject: %s) is not the issuer and does not carry id-kp-OCSPSigning", respCert.Subject)
 }

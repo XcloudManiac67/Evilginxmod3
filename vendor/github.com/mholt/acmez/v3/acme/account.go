@@ -25,13 +25,20 @@ import (
 // Account represents a set of metadata associated with an account
 // as defined by the ACME spec §7.1.2:
 // https://tools.ietf.org/html/rfc8555#section-7.1.2
+//
+// Users of this Go package should generally set Contact,
+// TermsOfServiceAgreed, ExternalAccountBinding if relevant,
+// and PrivateKey fields when creating a new account. Other
+// fields are populated by the ACME server.
 type Account struct {
 	// status (required, string):  The status of this account.  Possible
 	// values are "valid", "deactivated", and "revoked".  The value
 	// "deactivated" should be used to indicate client-initiated
 	// deactivation whereas "revoked" should be used to indicate server-
 	// initiated deactivation.  See Section 7.1.6.
-	Status string `json:"status"`
+	//
+	// The client need NOT set this field when creating a new account.
+	Status string `json:"status,omitempty"`
 
 	// contact (optional, array of string):  An array of URLs that the
 	// server can use to contact the client for issues related to this
@@ -57,7 +64,17 @@ type Account struct {
 	// orders (required, string):  A URL from which a list of orders
 	// submitted by this account can be fetched via a POST-as-GET
 	// request, as described in Section 7.1.2.1.
-	Orders string `json:"orders"`
+	//
+	// When empty, this field is omitted from JSON encodings since it
+	// is not in the subset of fields described by the spec for inclusion
+	// when creating an account (§7.3), but the spec also says in that
+	// same section: "The server MUST ignore any values provided in the
+	// "orders" fields in account objects sent by the client." Yet, we
+	// have reports of non-compliant ACME servers (see
+	// https://caddy.community/t/failing-to-register-an-acme-account/27220/5)
+	// so we tighten up our serialization a bit to omit empty Orders,
+	// even though the spec also says this field is "required".
+	Orders string `json:"orders,omitempty"`
 
 	// In response to new-account, "the server returns this account
 	// object in a 201 (Created) response, with the account URL
@@ -70,6 +87,8 @@ type Account struct {
 	// The private key to the account. Because it is secret, it is
 	// not serialized as JSON and must be stored separately (usually
 	// a PEM-encoded file).
+	//
+	// This is a required field when creating a new account.
 	PrivateKey crypto.Signer `json:"-"`
 }
 
@@ -94,6 +113,15 @@ func (a *Account) SetExternalAccountBinding(ctx context.Context, client *Client,
 	a.ExternalAccountBinding = eabJWS
 
 	return nil
+}
+
+// Thumbprint returns the ACME account's thumbprint. The PrivateKey field
+// must be set so the public key can be derived for the thumbprint, or this
+// will panic.
+//
+// EXPERIMENTAL: Subject to change/removal.
+func (a *Account) Thumbprint() (string, error) {
+	return jwkThumbprint(a.PrivateKey.Public())
 }
 
 // NewAccount creates a new account on the ACME server.

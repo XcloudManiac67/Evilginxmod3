@@ -17,7 +17,10 @@ package acme
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/base32"
 	"encoding/base64"
+	"fmt"
+	"strings"
 )
 
 // Challenge holds information about an ACME challenge.
@@ -79,11 +82,21 @@ type Challenge struct {
 	// information to solve the DNS-01 challenge.
 	Identifier Identifier `json:"identifier,omitempty"`
 
+	// From header of email must match with the "from" field of challenge object
+	// as described in RFC8823 §3.1 - 2, added on 3-6.3.1
+	From string `json:"from,omitempty"`
+
 	// Payload contains a JSON-marshallable value that will be sent to the CA
 	// when responding to challenges. If not set, an empty JSON body "{}" will
 	// be included in the POST request. This field is applicable when responding
 	// to "device-attest-01" challenges.
 	Payload any `json:"-"`
+
+	// TkAuthType is the Authority Token Subtype as described in RFC9447 §3
+	// This field is only applicable when responding to "tkauth-01" challenges
+	// and indicates the type of Authority token that will be used
+	// to validate the challenge.
+	TkAuthType string `json:"tkauth-type,omitempty"`
 }
 
 // HTTP01ResourcePath returns the URI path for solving the http-01 challenge.
@@ -120,6 +133,44 @@ func (c Challenge) DNS01KeyAuthorization() string {
 	return base64.RawURLEncoding.EncodeToString(h[:])
 }
 
+// DNSAccount01TXTRecordName returns the name of the TXT record to create
+// for solving the dns-account-01 challenge. §3.2
+//
+// The base32 encoding uses the standard RFC 4648 alphabet (uppercase A-Z),
+// but DNS labels are converted to lowercase for canonical form and
+// interoperability. Some providers (e.g., CloudFront, GlobalSign) enforce
+// lowercase labels, making lowercase conversion essential for reliable operation.
+func (c Challenge) DNSAccount01TXTRecordName(a Account) string {
+	acctURLhash := sha256.Sum256([]byte(a.Location))
+	truncAcctURLHash := acctURLhash[:10]
+	b32TruncAcctURLHash := base32.StdEncoding.EncodeToString(truncAcctURLHash)
+	canonicalForm := strings.ToLower(b32TruncAcctURLHash)
+	return fmt.Sprintf("_%s._acme-challenge.%s", canonicalForm, c.Identifier.Value)
+}
+
+// MailReply00KeyAuthorization encodes a key authorization value
+// to be sent back to the reply-to address of the ACME challenge email.
+// The subject of that mail contains token-part1, which must be combined
+// with token-part2, which was received as part of the JSON challenge as
+// described in RFC8823 §3.1.
+func (c Challenge) MailReply00KeyAuthorization(mailSubject string) (string, error) {
+	// if subject given has "ACME:" header, strip it before calculating the key authorization
+	mailSubject = strings.TrimPrefix(mailSubject, "ACME: ")
+	tokenPart1, err := base64.RawURLEncoding.DecodeString(mailSubject)
+	if err != nil {
+		return "", fmt.Errorf("failed decoding token-part1: %w", err)
+	}
+	tokenPart2, err := base64.RawURLEncoding.DecodeString(c.Token)
+	if err != nil {
+		return "", fmt.Errorf("failed decoding token-part2: %w", err)
+	}
+	fullToken := append(tokenPart1, tokenPart2...)
+	encodedFullToken := base64.RawURLEncoding.EncodeToString(fullToken)
+	mailKeyAuth := strings.Replace(c.KeyAuthorization, c.Token, encodedFullToken, 1)
+	h := sha256.Sum256([]byte(mailKeyAuth))
+	return base64.RawURLEncoding.EncodeToString(h[:]), nil
+}
+
 // InitiateChallenge "indicates to the server that it is ready for the challenge
 // validation by sending an empty JSON body ('{}') carried in a POST request to
 // the challenge URL (not the authorization URL)." §7.5.1
@@ -140,4 +191,7 @@ const (
 	ChallengeTypeDNS01          = "dns-01"           // RFC 8555 §8.4
 	ChallengeTypeTLSALPN01      = "tls-alpn-01"      // RFC 8737 §3
 	ChallengeTypeDeviceAttest01 = "device-attest-01" // draft-acme-device-attest-00 §5
+	ChallengeTypeEmailReply00   = "email-reply-00"   // RFC 8823 §5.2
+	ChallengeTypeAuthorityToken = "tkauth-01"        // RFC 9447 §3 - ACME Authority Token challenge type
+	ChallengeTypeDNSAccount01   = "dns-account-01"   // draft-ietf-acme-dns-account-label-01 §5
 )
