@@ -10,7 +10,7 @@ require (
 	github.com/elazarl/goproxy v0.0.0-20220529153421-8ea89ba92021
 	github.com/emersion/go-imap v1.2.1
 	github.com/emersion/go-message v0.18.2
-	github.com/fatih/color v1.13.0
+	github.com/fatih/color v1.19.0
 	github.com/go-acme/lego/v3 v3.1.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/gophish/gomail v0.0.0-20200818021916-1f6d0dfd512e
@@ -51,7 +51,7 @@ require (
 	github.com/lib/pq v1.12.0 // indirect
 	github.com/libdns/libdns v0.2.1 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
-	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.21 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
 	github.com/mholt/acmez v1.2.0 // indirect
