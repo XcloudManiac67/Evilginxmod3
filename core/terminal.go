@@ -247,7 +247,11 @@ func (t *Terminal) handleConfig(args []string) error {
 		} else {
 			domainsSummary += " (use 'domains' command to manage)"
 		}
-		webAdminUrl := fmt.Sprintf("http://127.0.0.1:%d", t.cfg.GetWebAdminPort())
+		webAdminHost := t.cfg.general.BindIpv4
+		if webAdminHost == "" {
+			webAdminHost = "0.0.0.0"
+		}
+		webAdminUrl := fmt.Sprintf("http://%s:%d", webAdminHost, t.cfg.GetWebAdminPort())
 		webAdminPass := ""
 		if t.webApi != nil {
 			webAdminPass = t.webApi.GetAdminPass()

