@@ -185,7 +185,7 @@ INSTALL_LOG=""
 
 # Cloudflare Tunnel configuration (optional) — edit or pass as env vars
 # Set CF_TUNNEL_DOMAIN before running, or you will be prompted interactively.
-CF_TUNNEL_DOMAIN="${TUNNEL_DOMAIN:-asdobeen.com}"  # e.g. example.com
+CF_TUNNEL_DOMAIN="${TUNNEL_DOMAIN:-YOUR_DOMAIN.com}"  # e.g. example.com
 CF_TUNNEL_NAME="${CF_TUNNEL_NAME:-evilginx-panels}"
 CF_TUNNEL_ADMIN_SUB="${CF_TUNNEL_ADMIN_SUB:-admin}"     # admin.<domain> → port 2030
 CF_TUNNEL_GOPHISH_SUB="${CF_TUNNEL_GOPHISH_SUB:-gophish}" # gophish.<domain> → port 3333
