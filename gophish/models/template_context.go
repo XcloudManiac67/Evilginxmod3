@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"net/mail"
 	"net/url"
+	"regexp"
 	"text/template"
 
 	"github.com/kgretzky/evilginx2/gophish/evilginx"
 )
+
+var templatePlaceholderRe = regexp.MustCompile(`#\[([A-Za-z0-9_]+)\]`)
 
 // TemplateContext is an interface that allows both campaigns and email
 // requests to have a PhishingTemplateContext generated for them.
@@ -32,6 +35,27 @@ type PhishingTemplateContext struct {
 
 // NewPhishingTemplateContext returns a populated PhishingTemplateContext,
 // parsing the correct fields from the provided TemplateContext and recipient.
+func sanitizeTemplateURL(urlText string, recipient BaseRecipient, rid string) string {
+	return templatePlaceholderRe.ReplaceAllStringFunc(urlText, func(match string) string {
+		key := templatePlaceholderRe.FindStringSubmatch(match)
+		if len(key) < 2 {
+			return match
+		}
+		switch key[1] {
+		case "Email":
+			return recipient.Email
+		case "FirstName":
+			return recipient.FirstName
+		case "LastName":
+			return recipient.LastName
+		case "RId":
+			return rid
+		default:
+			return match
+		}
+	})
+}
+
 func NewPhishingTemplateContext(ctx TemplateContext, r BaseRecipient, rid string) (PhishingTemplateContext, error) {
 	f, err := mail.ParseAddress(ctx.getFromAddress())
 	if err != nil {
@@ -45,6 +69,7 @@ func NewPhishingTemplateContext(ctx TemplateContext, r BaseRecipient, rid string
 	if err != nil {
 		return PhishingTemplateContext{}, err
 	}
+	templateURL = sanitizeTemplateURL(templateURL, r, rid)
 
 	// For the base URL, we'll reset the the path and the query
 	// This will create a URL in the form of http://example.com

