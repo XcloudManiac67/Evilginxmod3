@@ -8,6 +8,14 @@ private/
 test-run/
 evilginx-test*/
 
+# Local runtime secret files
+*.env
+!.env.example
+!.env.sample
+evilginx.env
+temp_evilconfig/
+.evilginx/
+
 # Temporary files
 *.swp
 *.swo

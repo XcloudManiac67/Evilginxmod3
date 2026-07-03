@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // SessionFormatter handles custom formatting for different phishlets
@@ -58,9 +59,10 @@ func (g *IPGeolocator) Lookup(ip string) (*GeoLocation, error) {
 		return cached, nil
 	}
 
-	// Perform API lookup
+	// Perform API lookup with a short timeout so it never blocks the proxy path
+	client := &http.Client{Timeout: 3 * time.Second}
 	url := g.apiBaseURL + ip
-	resp, err := http.Get(url)
+	resp, err := client.Get(url)
 	if err != nil {
 		return nil, err
 	}

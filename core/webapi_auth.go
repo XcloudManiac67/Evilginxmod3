@@ -45,11 +45,17 @@ func generateToken(n int) (string, error) {
 func (w *WebAPI) initAuth() {
 	users, err := w.db.ListUsers()
 	if err != nil || len(users) == 0 {
-		pass, err := generateToken(16)
-		if err != nil {
-			log.Error("webapi: failed to generate admin password: %v", err)
-			return
+		var pass string
+		if w.adminPass != "" {
+			pass = w.adminPass
+		} else {
+			pass, err = generateToken(16)
+			if err != nil {
+				log.Error("webapi: failed to generate admin password: %v", err)
+				return
+			}
 		}
+
 		hash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 		if err != nil {
 			log.Error("webapi: failed to hash admin password: %v", err)
@@ -60,17 +66,22 @@ func (w *WebAPI) initAuth() {
 			log.Error("webapi: failed to create admin user: %v", err)
 			return
 		}
-		user.MustChangePassword = true
-		if err := w.db.UpdateUser(user.Id, user); err != nil {
-			log.Error("webapi: failed to mark admin password change as required: %v", err)
-			return
+
+		if w.adminPass == "" {
+			user.MustChangePassword = true
+			if err := w.db.UpdateUser(user.Id, user); err != nil {
+				log.Error("webapi: failed to mark admin password change as required: %v", err)
+				return
+			}
+			w.adminPass = pass
+			log.Important("==============================================")
+			log.Important("  Web Admin default credentials:")
+			log.Important("  Username: admin")
+			log.Important("  Password: %s", pass)
+			log.Important("==============================================")
+		} else {
+			w.adminPass = pass
 		}
-		w.adminPass = pass
-		log.Important("==============================================")
-		log.Important("  Web Admin default credentials:")
-		log.Important("  Username: admin")
-		log.Important("  Password: %s", pass)
-		log.Important("==============================================")
 	}
 }
 

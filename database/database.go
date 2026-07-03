@@ -98,6 +98,10 @@ func (d *Database) Flush() {
 	d.db.Shrink()
 }
 
+func (d *Database) Close() {
+	d.db.Close()
+}
+
 func (d *Database) genIndex(table_name string, id int) string {
 	return table_name + ":" + strconv.Itoa(id)
 }

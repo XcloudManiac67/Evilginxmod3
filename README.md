@@ -79,7 +79,9 @@ For comprehensive instructions on installation, detailed configuration, enterpri
 
 **👉 [Complete deployment guide (DEPLOYMENT.md)](DEPLOYMENT.md)** — clone from [github.com/XcloudManiac67/Evilginxmod3](https://github.com/XcloudManiac67/Evilginxmod3)
 
-**🧭 Linux setup summary:** See [setup.md](setup.md) for installer, manual build, Docker, and Cloudflare deployment options.
+**🧭 OS-specific deployment guides:**
+- [DEPLOYMENT-LINUX.md](DEPLOYMENT-LINUX.md) for Linux installation and service setup
+- [DEPLOYMENT-WINDOWS.md](DEPLOYMENT-WINDOWS.md) for Windows installation and local admin password recovery
 
 ---
 

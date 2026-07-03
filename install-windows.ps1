@@ -67,6 +67,7 @@ $PHISHLETS_DIR = "$INSTALL_DIR\phishlets"
 $REDIRECTORS_DIR = "$INSTALL_DIR\redirectors"
 $POST_REDIRECTORS_DIR = "$INSTALL_DIR\post_redirectors"
 $SERVICE_NAME = "Evilginx"
+$EVILGINX_ADMIN_PASSWORD = ""
 $NSSM_VERSION = "2.24"
 $NSSM_URL = "https://nssm.cc/release/nssm-${NSSM_VERSION}.zip"
 
@@ -247,6 +248,51 @@ function Build-Evilginx {
     } finally {
         Pop-Location
     }
+}
+
+function Generate-RandomPassword {
+    $charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*()-_=+"
+    -join (1..24 | ForEach-Object { $charset[(Get-Random -Minimum 0 -Maximum $charset.Length)] })
+}
+
+function Setup-WebAdminPassword {
+    Write-Step "Step 4: Configuring Web Admin Password"
+
+    if ($EVILGINX_ADMIN_PASSWORD -ne "") {
+        Write-Info "Using provided web admin password from environment"
+    } else {
+        $setPassword = Read-Host "Set a custom Evilginx web admin password now? (yes/[no])"
+        if ($setPassword -eq "yes") {
+            while ($true) {
+                $password = Read-Host "Enter web admin password"
+                $confirm = Read-Host "Confirm web admin password"
+                if ($password -ne $confirm) {
+                    Write-Warning "Passwords do not match. Please try again."
+                    continue
+                }
+                if ([string]::IsNullOrEmpty($password)) {
+                    Write-Warning "Password cannot be empty. Please try again."
+                    continue
+                }
+                $EVILGINX_ADMIN_PASSWORD = $password
+                break
+            }
+        } else {
+            $EVILGINX_ADMIN_PASSWORD = Generate-RandomPassword
+            Write-Warning "A random web admin password was generated. Record it now before continuing."
+            Write-Output "Web admin password: $EVILGINX_ADMIN_PASSWORD"
+        }
+    }
+
+    if (-not (Test-Path $CONFIG_DIR)) {
+        New-Item -ItemType Directory -Path $CONFIG_DIR -Force | Out-Null
+    }
+
+    @"
+EVILGINX_ADMIN_PASSWORD="$EVILGINX_ADMIN_PASSWORD"
+"@ | Out-File -FilePath "$CONFIG_DIR\evilginx.env" -Encoding ASCII
+
+    Write-Success "Web admin password saved to $CONFIG_DIR\evilginx.env"
 }
 
 # Install files
@@ -516,9 +562,16 @@ function Show-Completion {
 
     Write-ColorOutput Green "Documentation:"
     Write-Output "  • Deployment Guide:     $INSTALL_DIR\DEPLOYMENT.md"
+    Write-Output "  • Linux Deployment:     $INSTALL_DIR\DEPLOYMENT-LINUX.md"
+    Write-Output "  • Windows Deployment:   $INSTALL_DIR\DEPLOYMENT-WINDOWS.md"
     Write-Output "  • Domain Rotation:      $INSTALL_DIR\DOMAIN-ROTATION-GUIDE.md"
     Write-Output "  • Cloudflare Workers:   $INSTALL_DIR\cloudflare-workers-deployment.md"
     Write-Output "  • README:               $INSTALL_DIR\README.md"
+    Write-Output ""
+    Write-ColorOutput Yellow "⚠️  IMPORTANT: Web Admin Password"
+    Write-Output "  • Admin password file:  $CONFIG_DIR\evilginx.env"
+    Write-Output "  • Admin panel URL:      http://127.0.0.1:2030/login"
+    Write-Output "  • Username:             admin"
     Write-Output ""
     
     Write-ColorOutput Cyan "Quick Start:"
@@ -544,6 +597,7 @@ function Main {
     # Installation steps
     Install-Go
     Build-Evilginx
+    Setup-WebAdminPassword
     Install-Files
     Configure-Firewall
     Create-Service

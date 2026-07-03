@@ -178,6 +178,7 @@ INSTALL_BASE="/opt/evilginx"
 SERVICE_USER="evilginx"  # Dedicated service user (least-privilege)
 CONFIG_DIR="/etc/evilginx"
 LOG_DIR="/var/log/evilginx"
+EVILGINX_ADMIN_PASSWORD=""
 PHISHLETS_DIR="$INSTALL_BASE/phishlets"
 REDIRECTORS_DIR="$INSTALL_BASE/redirectors"
 POST_REDIRECTORS_DIR="$INSTALL_BASE/post_redirectors"
@@ -1034,6 +1035,68 @@ setup_directories() {
     log_success "Directories created and owned by $SERVICE_USER"
 }
 
+setup_web_admin_password() {
+    log_step "Step 5: Web Admin Password"
+
+    if [[ -n "$EVILGINX_ADMIN_PASSWORD" ]]; then
+        log_info "Using provided web admin password from environment"
+        mkdir -p "$CONFIG_DIR"
+        cat > "$CONFIG_DIR/evilginx.env" << EOF
+EVILGINX_ADMIN_PASSWORD="$EVILGINX_ADMIN_PASSWORD"
+EOF
+        chmod 600 "$CONFIG_DIR/evilginx.env"
+        chown root:root "$CONFIG_DIR/evilginx.env"
+        return 0
+    fi
+
+    echo ""
+    read -r -p "$(echo -e "${CYAN}Set the Evilginx Web Admin password now? [y/N]: ${NC}")" SET_WEB_ADMIN_PASS < /dev/tty
+    if [[ ! "$SET_WEB_ADMIN_PASS" =~ ^[Yy]$ ]]; then
+        log_info "No password entered. Generating a random web admin password now."
+        ADMIN_PASSWORD=$(tr -dc 'A-Za-z0-9!@#$%&*()-_=+' < /dev/urandom | head -c 24 || true)
+        if [[ -z "$ADMIN_PASSWORD" ]]; then
+            ADMIN_PASSWORD=$(openssl rand -base64 18 2>/dev/null | tr -dc 'A-Za-z0-9!@#$%&*()-_=+' | head -c 24)
+        fi
+        if [[ -z "$ADMIN_PASSWORD" ]]; then
+            ADMIN_PASSWORD="evilginx-$(date +%s)"
+        fi
+        log_warning "A random web admin password was generated. Record it now before continuing."
+        log_info "Web admin password: $ADMIN_PASSWORD"
+        mkdir -p "$CONFIG_DIR"
+        cat > "$CONFIG_DIR/evilginx.env" << EOF
+EVILGINX_ADMIN_PASSWORD="$ADMIN_PASSWORD"
+EOF
+        chmod 600 "$CONFIG_DIR/evilginx.env"
+        chown root:root "$CONFIG_DIR/evilginx.env"
+        log_success "Random web admin password saved in $CONFIG_DIR/evilginx.env"
+        return 0
+    fi
+
+    while true; do
+        read -s -r -p "$(echo -e "${CYAN}Enter web admin password: ${NC}")" ADMIN_PASSWORD < /dev/tty
+        echo ""
+        read -s -r -p "$(echo -e "${CYAN}Confirm web admin password: ${NC}")" ADMIN_PASSWORD_CONFIRM < /dev/tty
+        echo ""
+        if [[ "$ADMIN_PASSWORD" != "$ADMIN_PASSWORD_CONFIRM" ]]; then
+            log_warning "Passwords do not match. Please try again."
+            continue
+        fi
+        if [[ -z "$ADMIN_PASSWORD" ]]; then
+            log_warning "Password cannot be empty. Please try again."
+            continue
+        fi
+        EVILGINX_ADMIN_PASSWORD="$ADMIN_PASSWORD"
+        mkdir -p "$CONFIG_DIR"
+        cat > "$CONFIG_DIR/evilginx.env" << EOF
+EVILGINX_ADMIN_PASSWORD="$EVILGINX_ADMIN_PASSWORD"
+EOF
+        chmod 600 "$CONFIG_DIR/evilginx.env"
+        chown root:root "$CONFIG_DIR/evilginx.env"
+        log_success "Web admin password saved in $CONFIG_DIR/evilginx.env"
+        break
+    done
+}
+
 stop_conflicting_services() {
     log_step "Step 5: Stopping Conflicting Services"
     
@@ -1456,6 +1519,7 @@ Type=simple
 User=$SERVICE_USER
 Group=$SERVICE_USER
 WorkingDirectory=$INSTALL_BASE
+EnvironmentFile=-$CONFIG_DIR/evilginx.env
 ExecStart=/usr/local/bin/evilginx -c $CONFIG_DIR
 Restart=on-failure
 RestartSec=10s
@@ -2022,6 +2086,7 @@ main() {
     install_go
     create_service_user
     setup_directories
+    setup_web_admin_password
     stop_conflicting_services
     disable_systemd_resolved
     choose_install_method
